@@ -18,3 +18,7 @@ __pycache__/
 
 # Generated images
 docs/images/
+
+# Node / Vite
+node_modules/
+dist/
