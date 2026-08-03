@@ -8,10 +8,11 @@ web development. Target audience: 5-10 scientists who are not coders.
 
 ## Tech Stack
 
-TBD — deciding via wayfinder. Constraints:
-- Must run locally (no server deployment yet)
-- Must be learnable by someone with zero web experience
-- Must produce results that don't look like AI slop
+- **Svelte 5** — UI framework (components, reactivity)
+- **Vite 8** — dev server and build tool
+- **TypeScript 6** — typed JavaScript
+- **Plotly.js** — interactive scientific plots (to be added)
+- Static site — no backend, runs locally from `dist/` or via dev server
 
 ## Principles
 
@@ -22,7 +23,10 @@ TBD — deciding via wayfinder. Constraints:
 
 ## Commands
 
-TBD after tech stack decision.
+- `npm run dev` — start dev server (localhost:5173, hot-reload)
+- `npm run build` — production build to `dist/`
+- `npm run preview` — preview production build locally
+- `npm run check` — run Svelte + TypeScript type checking
 
 ## Working with This Codebase
 
