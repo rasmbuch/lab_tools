@@ -1,0 +1,20 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Generated images
+docs/images/
