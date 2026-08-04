@@ -33,3 +33,17 @@ web development. Target audience: 5-10 scientists who are not coders.
 - This is a wayfinder-managed project. See docs/.wayfinder/ for the decision map.
 - Don't skip ahead — resolve wayfinder tickets in order.
 - When in doubt, `/grill-me` before building.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on rasmbuch/lab_tools. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-label vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` at repo root, ADRs in `docs/adr/`. See `docs/agents/domain.md`.
