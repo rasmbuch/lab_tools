@@ -3,6 +3,7 @@
   import Sidebar from './Sidebar.svelte';
   import Dashboard from './Dashboard.svelte';
   import EnergyConverter from './EnergyConverter.svelte';
+  import IntensityCalculator from './IntensityCalculator.svelte';
   import Placeholder from './Placeholder.svelte';
 
   let currentRoute: Route = $state(parseHash());
@@ -23,7 +24,7 @@
     {:else if currentRoute === 'energy'}
       <EnergyConverter />
     {:else if currentRoute === 'intensity'}
-      <Placeholder number="02" category="equivalents" title="Intensity & fluence" />
+      <IntensityCalculator />
     {:else if currentRoute === 'eta'}
       <Placeholder number="03" category="focal map" title="η / η′ per atom" />
     {:else if currentRoute === 'omega'}
