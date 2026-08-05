@@ -1,97 +1,47 @@
 <script lang="ts">
-  const HC_KEV_ANGSTROM = 12.39842  // hc in keV·Å
+  import { parseHash, type Route } from './lib/router';
+  import Sidebar from './Sidebar.svelte';
+  import Dashboard from './Dashboard.svelte';
+  import EnergyConverter from './EnergyConverter.svelte';
+  import Placeholder from './Placeholder.svelte';
 
-  let wavelength_A = $state(1.5406)  // Cu Kα default
+  let currentRoute: Route = $state(parseHash());
 
-  let energy_keV = $derived(
-    wavelength_A > 0 ? HC_KEV_ANGSTROM / wavelength_A : NaN
-  )
+  $effect(() => {
+    const onHashChange = () => { currentRoute = parseHash(); };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  });
 </script>
 
-<main>
-  <h1>Lab Tools</h1>
-  <p class="subtitle">Crystallography & scattering calculators</p>
+<div class="shell">
+  <Sidebar {currentRoute} />
 
-  <div class="card">
-    <label>
-      Wavelength (Å)
-      <input
-        type="number"
-        bind:value={wavelength_A}
-        step="0.001"
-        min="0.01"
-      />
-    </label>
-
-    <div class="result">
-      {#if Number.isFinite(energy_keV)}
-        <span class="value">{energy_keV.toFixed(4)}</span>
-        <span class="unit">keV</span>
-      {:else}
-        <span class="value">—</span>
-      {/if}
-    </div>
-  </div>
-</main>
+  <main>
+    {#if currentRoute === 'dashboard'}
+      <Dashboard />
+    {:else if currentRoute === 'energy'}
+      <EnergyConverter />
+    {:else if currentRoute === 'intensity'}
+      <Placeholder number="02" category="equivalents" title="Intensity & fluence" />
+    {:else if currentRoute === 'eta'}
+      <Placeholder number="03" category="focal map" title="η / η′ per atom" />
+    {:else if currentRoute === 'omega'}
+      <Placeholder number="04" category="geometry" title="Solid angle" />
+    {:else if currentRoute === 'about'}
+      <Placeholder number="05" category="info" title="Design notes" />
+    {/if}
+  </main>
+</div>
 
 <style>
+  .shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
   main {
-    max-width: 480px;
-    margin: 4rem auto;
-    padding: 2rem;
-    font-family: system-ui, -apple-system, sans-serif;
-    color: #222;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 1.8rem;
-  }
-
-  .subtitle {
-    color: #666;
-    margin-top: 0.25rem;
-  }
-
-  .card {
-    margin-top: 2rem;
-    padding: 1.5rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fafafa;
-  }
-
-  label {
-    display: block;
-    font-size: 0.9rem;
-    color: #555;
-  }
-
-  input {
-    display: block;
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    font-size: 1.1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .result {
-    margin-top: 1.5rem;
-    text-align: center;
-  }
-
-  .value {
-    font-size: 2rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .unit {
-    font-size: 1.2rem;
-    color: #666;
-    margin-left: 0.5rem;
+    flex: 1;
+    min-width: 0;
   }
 </style>

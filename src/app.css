@@ -1,3 +1,68 @@
+/* ── Fonts ─────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./assets/fonts/archivo-variable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-500.woff2') format('woff2');
+}
+
+/* ── Design tokens ────────────────────────────────────────────────── */
+
+:root {
+  /* Palette — from mockup, inspired by Emil Nolde */
+  --color-sidebar: #16225C;
+  --color-sidebar-text: #EDE7DA;
+  --color-sidebar-muted: #8FA0D8;
+  --color-sidebar-nav-muted: #7482BE;
+  --color-sidebar-border: rgba(237, 231, 218, 0.14);
+  --color-sidebar-hover: rgba(237, 231, 218, 0.05);
+
+  --color-surface: #F4F1EA;
+  --color-surface-card: #FBF9F4;
+  --color-surface-card-hover: #FFFDF8;
+
+  --color-text: #171512;
+  --color-text-muted: #5C554B;
+  --color-text-faint: #8C8477;
+
+  --color-accent: #EF6C1E;
+  --color-accent-gold: #E3B84A;
+  --color-link: #2F49B8;
+  --color-link-hover: #D4351F;
+
+  --color-rule: rgba(23, 21, 18, 0.14);
+  --color-rule-light: rgba(23, 21, 18, 0.12);
+
+  --color-selection: #FBE9A6;
+
+  /* Typography */
+  --font-ui: 'Archivo', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Sidebar dimensions */
+  --sidebar-width: 262px;
+}
+
+/* ── Reset ────────────────────────────────────────────────────────── */
+
 *,
 *::before,
 *::after {
@@ -6,6 +71,38 @@
 
 body {
   margin: 0;
-  background: #fff;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-selection);
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(47, 73, 184, 0.35);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  border-bottom-color: var(--color-link-hover);
+}
+
+input, select, button, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }
