@@ -7,10 +7,9 @@
     type EnergyUnit, type WavelengthUnit, type FrequencyUnit,
   } from './lib/convert';
   import { sigfigs } from './lib/format';
+  import { photonEnergy } from './lib/stores.svelte';
 
   type Field = 'energy' | 'wavelength' | 'frequency';
-
-  let eV = $state(9.7e3); // default 9.7 keV
 
   let activeField: Field | null = $state(null);
   let rawInput = $state('');
@@ -20,13 +19,13 @@
   let frequencyUnit: FrequencyUnit = $state('THz');
 
   let energyDisplay = $derived(
-    activeField === 'energy' ? rawInput : formatValue(evToEnergy(eV, energyUnit))
+    activeField === 'energy' ? rawInput : formatValue(evToEnergy(photonEnergy.eV, energyUnit))
   );
   let wavelengthDisplay = $derived(
-    activeField === 'wavelength' ? rawInput : formatValue(evToWavelength(eV, wavelengthUnit))
+    activeField === 'wavelength' ? rawInput : formatValue(evToWavelength(photonEnergy.eV, wavelengthUnit))
   );
   let frequencyDisplay = $derived(
-    activeField === 'frequency' ? rawInput : formatValue(evToFrequency(eV, frequencyUnit))
+    activeField === 'frequency' ? rawInput : formatValue(evToFrequency(photonEnergy.eV, frequencyUnit))
   );
 
   function formatValue(v: number): string {
@@ -40,19 +39,18 @@
     const num = parseFloat(value);
     if (!Number.isFinite(num) || num <= 0) return;
 
-    if (field === 'energy')     eV = energyToEV(num, energyUnit);
-    if (field === 'wavelength') eV = wavelengthToEV(num, wavelengthUnit);
-    if (field === 'frequency')  eV = frequencyToEV(num, frequencyUnit);
+    if (field === 'energy')     photonEnergy.eV = energyToEV(num, energyUnit);
+    if (field === 'wavelength') photonEnergy.eV = wavelengthToEV(num, wavelengthUnit);
+    if (field === 'frequency')  photonEnergy.eV = frequencyToEV(num, frequencyUnit);
   }
 
   function handleUnitChange(field: Field) {
-    // Recalculate display when unit changes on a non-active field
     if (activeField === field && rawInput) {
       const num = parseFloat(rawInput);
       if (!Number.isFinite(num) || num <= 0) return;
-      if (field === 'energy')     eV = energyToEV(num, energyUnit);
-      if (field === 'wavelength') eV = wavelengthToEV(num, wavelengthUnit);
-      if (field === 'frequency')  eV = frequencyToEV(num, frequencyUnit);
+      if (field === 'energy')     photonEnergy.eV = energyToEV(num, energyUnit);
+      if (field === 'wavelength') photonEnergy.eV = wavelengthToEV(num, wavelengthUnit);
+      if (field === 'frequency')  photonEnergy.eV = frequencyToEV(num, frequencyUnit);
     }
   }
 
@@ -84,7 +82,7 @@
           inputmode="decimal"
           class="field-input"
           value={energyDisplay}
-          onfocus={() => { activeField = 'energy'; rawInput = formatValue(evToEnergy(eV, energyUnit)); }}
+          onfocus={() => { activeField = 'energy'; rawInput = formatValue(evToEnergy(photonEnergy.eV, energyUnit)); }}
           oninput={(e) => handleInput('energy', e.currentTarget.value)}
           onblur={handleBlur}
         />
@@ -109,7 +107,7 @@
           inputmode="decimal"
           class="field-input"
           value={wavelengthDisplay}
-          onfocus={() => { activeField = 'wavelength'; rawInput = formatValue(evToWavelength(eV, wavelengthUnit)); }}
+          onfocus={() => { activeField = 'wavelength'; rawInput = formatValue(evToWavelength(photonEnergy.eV, wavelengthUnit)); }}
           oninput={(e) => handleInput('wavelength', e.currentTarget.value)}
           onblur={handleBlur}
         />
@@ -134,7 +132,7 @@
           inputmode="decimal"
           class="field-input"
           value={frequencyDisplay}
-          onfocus={() => { activeField = 'frequency'; rawInput = formatValue(evToFrequency(eV, frequencyUnit)); }}
+          onfocus={() => { activeField = 'frequency'; rawInput = formatValue(evToFrequency(photonEnergy.eV, frequencyUnit)); }}
           oninput={(e) => handleInput('frequency', e.currentTarget.value)}
           onblur={handleBlur}
         />

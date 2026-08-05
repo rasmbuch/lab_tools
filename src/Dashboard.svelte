@@ -30,9 +30,9 @@
     <ToolCard
       route="intensity"
       number="02"
-      category="equivalents"
+      category="calculator"
       title="Intensity & fluence"
-      description="W/cm² ↔ ph/nm² at a photon energy and pulse length."
+      description="Beam parameters in, peak irradiance and fluence out."
       preview="I = Ṅ · ℏω / A"
     />
     <ToolCard
