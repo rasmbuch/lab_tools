@@ -3,13 +3,14 @@
   import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode, transmission } from './stores.svelte';
   import { sigfigs } from './format';
 
-  type Field = 'photonEnergy' | 'pulseEnergy' | 'fwhmX' | 'fwhmY' | 'pulseDuration';
+  type Field = 'photonEnergy' | 'pulseEnergy' | 'fwhmX' | 'fwhmY' | 'pulseDuration' | 'transmission';
 
   let energyUnit: 'eV' | 'keV' = $state('keV');
   let pulseEnergyUnit: 'µJ' | 'mJ' = $state('µJ');
   let fwhmXUnit: 'nm' | 'µm' = $state('nm');
   let fwhmYUnit: 'nm' | 'µm' = $state('nm');
   let durationUnit: 'as' | 'fs' | 'ps' = $state('fs');
+  let transmissionUnit = $state<'x1' | '%'>('x1');
 
   let activeField: Field | null = $state(null);
   let rawInput = $state('');
@@ -43,6 +44,13 @@
   let pulseDurationDisplay = $derived(
     activeField === 'pulseDuration' ? rawInput : siToDisplay(pulseDuration.s, durationUnit, durationFactors)
   );
+  let transmissionDisplay = $derived(
+    activeField === 'transmission' ? rawInput : (
+      (transmissionUnit as string) === '%'
+        ? fmt(transmission.value * 100)
+        : String(transmission.value)
+    )
+  );
 
   function handleFocus(field: Field) {
     activeField = field;
@@ -57,6 +65,10 @@
         rawInput = fmt(fwhm.y_m / lengthFactors[fwhmYUnit]); break;
       case 'pulseDuration':
         rawInput = fmt(pulseDuration.s / durationFactors[durationUnit]); break;
+      case 'transmission':
+        rawInput = (transmissionUnit as string) === '%'
+          ? fmt(transmission.value * 100)
+          : String(transmission.value); break;
     }
   }
 
@@ -64,7 +76,8 @@
     activeField = field;
     rawInput = value;
     const num = parseFloat(value);
-    if (!Number.isFinite(num) || num <= 0) return;
+    if (!Number.isFinite(num)) return;
+    if (field !== 'transmission' && num <= 0) return;
 
     switch (field) {
       case 'photonEnergy':
@@ -77,6 +90,11 @@
         fwhm.y_m = num * lengthFactors[fwhmYUnit]; break;
       case 'pulseDuration':
         pulseDuration.s = num * durationFactors[durationUnit]; break;
+      case 'transmission': {
+        const val = (transmissionUnit as string) === '%' ? num / 100 : num;
+        if (val >= 0 && val <= 1) transmission.value = val;
+        break;
+      }
     }
   }
 
@@ -239,12 +257,19 @@
         type="text"
         inputmode="decimal"
         class="field-input"
-        value={transmission.value}
-        oninput={(e) => {
-          const v = parseFloat(e.currentTarget.value);
-          if (Number.isFinite(v) && v >= 0 && v <= 1) transmission.value = v;
-        }}
+        value={transmissionDisplay}
+        onfocus={() => handleFocus('transmission')}
+        oninput={(e) => handleInput('transmission', e.currentTarget.value)}
+        onblur={handleBlur}
       />
+      <select
+        class="field-unit"
+        bind:value={transmissionUnit}
+        onchange={() => handleUnitChange('transmission')}
+      >
+        <option value="x1">×1</option>
+        <option value="%">%</option>
+      </select>
     </div>
   </div>
 </div>

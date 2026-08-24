@@ -292,6 +292,7 @@
                 {#each etaResult.shells as s}
                   <button
                     class="lifetime-chip"
+                    class:active-lifetime={s.name === etaResult.eta_prime_shell}
                     onclick={() => tauOverride_fs = sigfigs(s.tau_hole_s * 1e15, 3)}
                   >
                     <span class="lifetime-shell">{s.name}</span>
@@ -568,6 +569,19 @@
 
   .lifetime-chip:hover {
     border-color: var(--color-link);
+  }
+
+  .lifetime-chip.active-lifetime {
+    background: #EF6C1E;
+    border-color: #EF6C1E;
+  }
+
+  .lifetime-chip.active-lifetime .lifetime-shell {
+    color: #fff;
+  }
+
+  .lifetime-chip.active-lifetime .lifetime-tau {
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .lifetime-shell {

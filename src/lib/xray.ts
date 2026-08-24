@@ -12,7 +12,7 @@ import dataPt from './data/xray-Pt.json';
 
 export type ElementSymbol = 'H' | 'C' | 'O' | 'Ne' | 'Xe' | 'Fe' | 'Cu' | 'Au' | 'Pt';
 
-export const ELEMENTS: readonly ElementSymbol[] = ['H', 'C', 'O', 'Ne', 'Xe', 'Fe', 'Cu', 'Au', 'Pt'];
+export const ELEMENTS: readonly ElementSymbol[] = ['H', 'C', 'O', 'Ne', 'Fe', 'Cu', 'Xe', 'Pt', 'Au'];
 
 const RAW: Record<ElementSymbol, XrayElementData> = {
   H: dataH as XrayElementData,

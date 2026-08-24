@@ -21,7 +21,7 @@
   <h2 class="card-title">{title}</h2>
   <p class="card-description">{description}</p>
   {#if preview}
-    <div class="card-preview">{preview}</div>
+    <div class="card-preview">{@html preview}</div>
   {/if}
 </button>
 

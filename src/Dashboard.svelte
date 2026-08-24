@@ -2,15 +2,21 @@
   import ToolCard from './ToolCard.svelte';
   import { sigfigs } from './lib/format';
   import { hc_keV_A } from './lib/constants';
+  import katex from 'katex';
+  import 'katex/dist/katex.min.css';
 
   const defaultKeV = 9.7;
   const defaultA = hc_keV_A / defaultKeV;
+
+  function itex(expr: string): string {
+    return katex.renderToString(expr, { displayMode: false, throwOnError: false });
+  }
 </script>
 
 <div class="dashboard">
   <div class="hero">
     <div>
-      <h1>Four instruments for<br>the beamline</h1>
+      <h1>Five instruments for<br>the beamline</h1>
     </div>
     <p class="hero-description">
       Everything updates as you type. Nothing is submitted, nothing is stored.
@@ -33,7 +39,7 @@
       category="calculator"
       title="Intensity & fluence"
       description="Beam parameters in, peak irradiance and fluence out."
-      preview="I = Ṅ · ℏω / A"
+      preview={itex(String.raw`I_\text{peak} = P_\text{peak} / A_\text{eff}`)}
     />
     <ToolCard
       route="eta"
@@ -41,7 +47,7 @@
       category="focal map"
       title="η / η′ per atom"
       description="Photons absorbed per atom per pulse from beam parameters."
-      preview="η = σ · Φ₀"
+      preview={itex(String.raw`\eta = \sigma_\text{photo} \cdot \Phi_0`)}
     />
     <ToolCard
       route="omega"
@@ -49,7 +55,15 @@
       category="geometry"
       title="Solid angle"
       description="Detector area and distance to solid angle in steradians."
-      preview="Ω = A / r²"
+      preview={itex(String.raw`\Omega = A / r^2`)}
+    />
+    <ToolCard
+      route="about"
+      number="05"
+      category="reference"
+      title="Formulas"
+      description="Every formula with derivations and literature citations."
+      preview={itex(String.raw`\eta' = \tfrac{\eta}{2}\operatorname{erf}(x)`)}
     />
   </div>
 </div>

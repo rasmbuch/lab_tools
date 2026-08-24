@@ -60,7 +60,8 @@
       <div class="formula">{@html tex(String.raw`A_\text{eff} = \frac{\pi}{2}\, w_{0x}\, w_{0y}`)}</div>
       <p>
         Equivalent top-hat area.
-        Flat-top: {@html itex(String.raw`A_\text{eff} = \tfrac{\pi}{4}\,\text{FWHM}_x \cdot \text{FWHM}_y`)} <a href="#ref">[5]</a>.
+        Flat-top: {@html itex(String.raw`A_\text{eff} = \tfrac{\pi}{4}\,\text{FWHM}_x \cdot \text{FWHM}_y`)}.
+        XCALIB Eq. 8 <a href="#ref">[5]</a>.
       </p>
     </div>
 
@@ -84,7 +85,7 @@
       </div>
       <h2>Peak irradiance</h2>
       <div class="formula">{@html tex(String.raw`I_\text{peak} = \frac{P_\text{peak}}{A_\text{eff}}`)}</div>
-      <p>On-axis power density at pulse centre, in W/cm².</p>
+      <p>On-axis power density at pulse centre, in W/cm<sup>2</sup>.</p>
     </div>
 
     <div class="card">
@@ -96,7 +97,7 @@
       <div class="formula">{@html tex(String.raw`\Phi_0 = \frac{N_\gamma}{A_\text{eff}}`)}</div>
       <p>
         Time-integrated photon surface density at beam centre.
-        Independent of temporal profile <a href="#ref">[2]</a> <a href="#ref">[3]</a>.
+        Neutze et al. Eq. 1 <a href="#ref">[2]</a>, Chapman et al. Supplementary <a href="#ref">[3]</a>.
       </p>
     </div>
 
@@ -109,7 +110,7 @@
       <div class="formula">{@html tex(String.raw`z_R = \frac{\pi\, w_0^2}{\lambda}`)}</div>
       <p>
         Distance from waist where beam area doubles.
-        Computed per-axis for elliptical beams <a href="#ref">[5]</a>.
+        XCALIB Eq. 6 <a href="#ref">[5]</a>; computed per-axis for elliptical beams.
       </p>
     </div>
 
@@ -122,8 +123,9 @@
       <div class="formula">{@html tex(String.raw`\eta = \sigma_\text{photo} \cdot \Phi_0`)}</div>
       <p>
         Expected photoabsorptions per atom per pulse.
-        {@html itex(String.raw`\eta < 1`)} is linear; {@html itex(String.raw`\eta \geq 1`)} is nonlinear
-        <a href="#ref">[1]</a> <a href="#ref">[2]</a> <a href="#ref">[4]</a>.
+        {@html itex(String.raw`\eta < 1`)} linear, {@html itex(String.raw`\eta \geq 1`)} nonlinear.
+        Son et al. rate-equation formalism <a href="#ref">[1]</a>;
+        Neutze et al. Eq. 1 damage threshold <a href="#ref">[2]</a>.
       </p>
     </div>
 
@@ -136,8 +138,8 @@
       <div class="formula">{@html tex(String.raw`\eta' = \frac{\eta_\text{photo}}{2}\,\operatorname{erf}\!\left(\frac{2\sqrt{\ln 2}\;\tau_\text{hole}}{\tau_\text{FWHM}}\right)`)}</div>
       <p>
         Fraction of fluence arriving in {@html itex(String.raw`[0,\,\tau_\text{hole}]`)} from pulse peak.
-        Assumes constant cross section, Gaussian temporal profile.
-        Full rate-equation approach in <a href="#ref">[1]</a>.
+        Closed-form Gaussian-pulse integral; constant-{@html itex(String.raw`\sigma`)} approximation
+        to the Son et al. rate equations <a href="#ref">[1]</a>.
       </p>
     </div>
 
@@ -177,27 +179,27 @@
         <tr>
           <td><code>CS_Photo(Z, E)</code></td>
           <td>photoabsorption cross section</td>
-          <td>cm²/g</td>
+          <td>cm<sup>2</sup>/g</td>
         </tr>
         <tr>
           <td><code>CS_Rayl(Z, E)</code></td>
           <td>Rayleigh (coherent) scattering</td>
-          <td>cm²/g</td>
+          <td>cm<sup>2</sup>/g</td>
         </tr>
         <tr>
           <td><code>CS_Compt(Z, E)</code></td>
           <td>Compton (incoherent) scattering</td>
-          <td>cm²/g</td>
+          <td>cm<sup>2</sup>/g</td>
         </tr>
         <tr>
           <td><code>CS_Total(Z, E)</code></td>
           <td>total attenuation</td>
-          <td>cm²/g</td>
+          <td>cm<sup>2</sup>/g</td>
         </tr>
         <tr>
           <td><code>CS_Photo_Partial(Z, shell, E)</code></td>
           <td>shell-resolved photoabsorption</td>
-          <td>cm²/g</td>
+          <td>cm<sup>2</sup>/g</td>
         </tr>
         <tr>
           <td><code>EdgeEnergy(Z, shell)</code></td>
@@ -212,7 +214,7 @@
       </tbody>
     </table>
     <p>
-      All cm²/g values are converted to cm²/atom:
+      All cm<sup>2</sup>/g values are converted to cm<sup>2</sup>/atom:
       {@html itex(String.raw`\sigma_\text{atom} = \sigma_{\text{cm}^2\text{/g}} \times A_r / N_A`)}.
       Energy grid: 0.1–200 keV with 2000 log-spaced points plus
       paired points bracketing each absorption edge.

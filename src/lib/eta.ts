@@ -2,7 +2,7 @@ import { computeBeam, type BeamParams } from './beam';
 import { getCrossSections, getElementInfo, type ElementSymbol } from './xray';
 
 const LN2 = Math.log(2);
-const HBAR_eV_s = 6.582119514e-16;
+const HBAR_eV_s = 6.582119569e-16;
 
 // Abramowitz & Stegun 7.1.26 — max error ~1.5e-7
 export function erf(x: number): number {
