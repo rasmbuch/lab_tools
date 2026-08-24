@@ -6,6 +6,7 @@ let _fwhm_x_m = $state(200e-9);
 let _fwhm_y_m = $state(200e-9);
 let _pulseDuration_s = $state(10e-15);
 let _mode: SpatialMode = $state('gaussian');
+let _transmission = $state(1.0);
 
 export const photonEnergy = {
   get eV() { return _eV; },
@@ -32,4 +33,9 @@ export const pulseDuration = {
 export const spatialMode = {
   get value() { return _mode; },
   set value(v: SpatialMode) { _mode = v; },
+};
+
+export const transmission = {
+  get value() { return _transmission; },
+  set value(v: number) { _transmission = v; },
 };

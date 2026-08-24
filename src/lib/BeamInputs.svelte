@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SpatialMode } from './beam';
-  import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode } from './stores.svelte';
+  import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode, transmission } from './stores.svelte';
   import { sigfigs } from './format';
 
   type Field = 'photonEnergy' | 'pulseEnergy' | 'fwhmX' | 'fwhmY' | 'pulseDuration';
@@ -228,6 +228,23 @@
         <option value="fs">fs</option>
         <option value="ps">ps</option>
       </select>
+    </div>
+  </div>
+
+  <div class="field-row">
+    <label class="field-label" for="beam-transmission">Beamline transmission</label>
+    <div class="field-input-group">
+      <input
+        id="beam-transmission"
+        type="text"
+        inputmode="decimal"
+        class="field-input"
+        value={transmission.value}
+        oninput={(e) => {
+          const v = parseFloat(e.currentTarget.value);
+          if (Number.isFinite(v) && v >= 0 && v <= 1) transmission.value = v;
+        }}
+      />
     </div>
   </div>
 </div>

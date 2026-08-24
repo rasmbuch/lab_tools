@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode } from './lib/stores.svelte';
+  import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode, transmission } from './lib/stores.svelte';
   import { ELEMENTS, getElementInfo, getCrossSections, type ElementSymbol } from './lib/xray';
   import { computeEta, computeHeatmap, computeEnergyScan } from './lib/eta';
   import { thresholdColorscale } from './lib/plotly-theme';
@@ -11,6 +11,12 @@
   let element: ElementSymbol = $state('Au');
   let heatmapMode: 'eta' | 'eta_prime' = $state('eta');
   let shellTableOpen = $state(false);
+  let tauOverride_fs: string = $state('');
+  let tauOverride_s = $derived(
+    tauOverride_fs !== '' ? parseFloat(tauOverride_fs) * 1e-15 : undefined
+  );
+  type SigmaUnit = 'barn' | 'cm²' | 'm²';
+  let sigmaUnit: SigmaUnit = $state('barn');
 
   function fmt(v: number): string {
     if (!Number.isFinite(v) || v <= 0) return '—';
@@ -24,19 +30,26 @@
 
   let beamParams = $derived({
     photonEnergy_eV: photonEnergy.eV,
-    pulseEnergy_J: pulseEnergy.J,
+    pulseEnergy_J: pulseEnergy.J * transmission.value,
     fwhm_x_m: fwhm.x_m,
     fwhm_y_m: fwhm.y_m,
     pulseDuration_s: pulseDuration.s,
     mode: spatialMode.value,
   });
 
-  let etaResult = $derived(computeEta(beamParams, element));
+  let etaResult = $derived(computeEta(beamParams, element, tauOverride_s));
   let crossSections = $derived(getCrossSections(element, photonEnergy.eV / 1e3));
-  let heatmap = $derived(computeHeatmap(beamParams, element));
+  let heatmap = $derived(computeHeatmap(beamParams, element, tauOverride_s));
   let energyScan = $derived(computeEnergyScan(beamParams, element));
 
   let isNonlinear = $derived(etaResult.eta_photo >= 1);
+
+  let sigmaDisplay = $derived(() => {
+    const sigma_cm2 = crossSections.sigma_total;
+    if (sigmaUnit === 'barn') return fmt(sigma_cm2 * 1e24);
+    if (sigmaUnit === 'cm²') return sigfigs(sigma_cm2, 4);
+    return sigfigs(sigma_cm2 * 1e-4, 4); // m²
+  });
 
   let heatmapData = $derived((): Data[] => {
     const is_eta = heatmapMode === 'eta';
@@ -133,9 +146,17 @@
         mode: 'lines' as const,
         name: `σ_photo (${element})`,
         line: { color: '#16225C', width: 1.8 },
-        yaxis: 'y2',
       },
       {
+        type: 'scatter' as const,
+        x: [currentKeV],
+        y: [currentSigma],
+        mode: 'markers' as const,
+        name: 'current',
+        marker: { color: '#D4351F', size: 7, line: { color: '#FBF9F4', width: 1.5 } },
+        showlegend: false,
+      },
+      /* {
         type: 'scatter' as const,
         x: energyScan.map(p => p.energy_keV),
         y: energyScan.map(p => p.eta),
@@ -150,16 +171,7 @@
         mode: 'lines' as const,
         name: "η'",
         line: { color: '#D4351F', width: 1.6, dash: 'dash' as const },
-      },
-      {
-        type: 'scatter' as const,
-        x: [currentKeV],
-        y: [etaResult.eta_photo],
-        mode: 'markers' as const,
-        name: 'current',
-        marker: { color: '#D4351F', size: 7, line: { color: '#FBF9F4', width: 1.5 } },
-        showlegend: false,
-      },
+      }, */
     ];
   });
 
@@ -182,7 +194,7 @@
         zeroline: false,
       },
       yaxis: {
-        title: { text: 'photons per atom', font: { family: "'Archivo', sans-serif", size: 11, color: '#4A443B' } },
+        title: { text: 'σ_photo  [barn]', font: { family: "'Archivo', sans-serif", size: 11, color: '#16225C' } },
         type: 'log' as const,
         linecolor: '#333333',
         linewidth: 0.9,
@@ -193,24 +205,8 @@
         ticklen: 4,
         showgrid: false,
         zeroline: false,
-        side: 'left',
       },
-      yaxis2: {
-        title: { text: 'σ  [barn]', font: { family: "'Archivo', sans-serif", size: 11, color: '#16225C' } },
-        type: 'log' as const,
-        linecolor: '#16225C',
-        linewidth: 0.9,
-        ticks: 'inside',
-        tickcolor: '#16225C',
-        tickwidth: 0.8,
-        ticklen: 4,
-        tickfont: { color: '#16225C' },
-        showgrid: false,
-        zeroline: false,
-        overlaying: 'y',
-        side: 'right',
-      },
-      margin: { l: 50, r: 60, t: 8, b: 42 },
+      margin: { l: 50, r: 20, t: 8, b: 42 },
       showlegend: true,
       legend: {
         x: 0.02, y: 0.98,
@@ -219,13 +215,6 @@
         borderwidth: 1,
         font: { size: 10 },
       },
-      shapes: [{
-        type: 'line',
-        x0: 0.1, x1: 100,
-        y0: 1, y1: 1,
-        xref: 'x', yref: 'y',
-        line: { color: '#171512', width: 1 },
-      }],
     };
   });
 
@@ -279,12 +268,41 @@
         </div>
       </div>
 
+      <div class="lifetime-section">
+        <div class="section-label">Hole lifetime override</div>
+        <div class="lifetime-chips">
+          {#each etaResult.shells as s}
+            <button
+              class="lifetime-chip"
+              onclick={() => tauOverride_fs = sigfigs(s.tau_hole_s * 1e15, 3)}
+            >
+              <span class="lifetime-shell">{s.name}</span>
+              <span class="lifetime-tau">{tauDisplay(s.tau_hole_s)}</span>
+            </button>
+          {/each}
+        </div>
+        <div class="lifetime-input-row">
+          <input
+            type="number"
+            class="lifetime-input"
+            placeholder="auto"
+            bind:value={tauOverride_fs}
+            step="any"
+            min="0"
+          />
+          <span class="output-unit">fs</span>
+          {#if tauOverride_fs !== ''}
+            <button class="lifetime-clear" onclick={() => tauOverride_fs = ''}>clear</button>
+          {/if}
+        </div>
+      </div>
+
       <div class="output-group">
         <div class="section-label">Derived</div>
         <div class="output-rows">
           <div class="output-row">
             <span class="output-label">σ (total)</span>
-            <span class="output-value">{fmt(crossSections.sigma_total * 1e24)} <span class="output-unit">barn</span></span>
+            <span class="output-value">{sigmaDisplay()} <select class="unit-select" bind:value={sigmaUnit}><option value="barn">barn</option><option value="cm²">cm²</option><option value="m²">m²</option></select></span>
           </div>
           <div class="output-row">
             <span class="output-label">η (photo)</span>
@@ -379,12 +397,12 @@
           <PlotlyChart data={heatmapData()} layout={heatmapLayout()} />
         </div>
 
-        <!-- <div class="plot-cell">
+        <div class="plot-cell">
           <div class="plot-header">
-            <span class="section-label" style="margin-bottom:0">η vs photon energy</span>
+            <span class="section-label" style="margin-bottom:0">σ vs photon energy</span>
           </div>
           <PlotlyChart data={energyScanData()} layout={energyScanLayout()} />
-        </div> -->
+        </div>
       </div>
     </div>
   </div>
@@ -539,6 +557,87 @@
     bottom: -1px;
     height: 3px;
     background: var(--color-accent);
+  }
+
+  /* ── Lifetime override ────────────────────────────────────────── */
+
+  .lifetime-section {
+    display: grid;
+    gap: 8px;
+  }
+
+  .lifetime-section .section-label {
+    margin-bottom: 0;
+  }
+
+  .lifetime-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .lifetime-chip {
+    padding: 4px 8px;
+    background: #F1EEE5;
+    border: 1px solid var(--color-rule);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.1s;
+  }
+
+  .lifetime-chip:hover {
+    border-color: var(--color-link);
+  }
+
+  .lifetime-shell {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    color: var(--color-text);
+  }
+
+  .lifetime-tau {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 1;
+    color: var(--color-text-faint);
+    margin-top: 2px;
+  }
+
+  .lifetime-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lifetime-input {
+    width: 80px;
+    padding: 4px 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .lifetime-input::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .lifetime-clear {
+    padding: 2px 8px;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .lifetime-clear:hover {
+    border-color: var(--color-link);
   }
 
   /* ── Result band ──────────────────────────────────────────────── */
@@ -710,6 +809,27 @@
     font-size: 11px;
     color: var(--color-text-faint);
     margin-left: 3px;
+  }
+
+  .unit-select {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--color-text-faint);
+    margin-left: 3px;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 1px solid var(--color-rule);
+    background: transparent;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+
+  .unit-select:hover {
+    color: var(--color-text);
+    border-bottom-color: var(--color-text);
   }
 
   /* ── Shell table ──────────────────────────────────────────────── */

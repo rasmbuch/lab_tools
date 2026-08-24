@@ -33,7 +33,7 @@ export interface EtaResult {
   shells: ShellEtaPrime[];
 }
 
-export function computeEta(params: BeamParams, element: ElementSymbol): EtaResult {
+export function computeEta(params: BeamParams, element: ElementSymbol, tau_override_s?: number): EtaResult {
   const beam = computeBeam(params);
   const energy_keV = params.photonEnergy_eV / 1e3;
   const cs = getCrossSections(element, energy_keV);
@@ -66,12 +66,16 @@ export function computeEta(params: BeamParams, element: ElementSymbol): EtaResul
     });
   }
 
-  // Dominant shell: largest partial cross section, lifetime as tiebreaker
   let eta_prime_val = 0;
   let eta_prime_shell = '';
   let eta_prime_tau_s = 0;
 
-  if (shells.length > 0) {
+  if (tau_override_s != null && tau_override_s > 0) {
+    const x = 2 * Math.sqrt(LN2) * tau_override_s / params.pulseDuration_s;
+    eta_prime_val = eta_photo * erf(x) / 2;
+    eta_prime_shell = 'custom';
+    eta_prime_tau_s = tau_override_s;
+  } else if (shells.length > 0) {
     const dominant = shells.reduce((best, s) => {
       if (s.sigma_cm2 > best.sigma_cm2) return s;
       if (s.sigma_cm2 === best.sigma_cm2 && s.tau_hole_s > best.tau_hole_s) return s;
@@ -102,8 +106,8 @@ export interface HeatmapData {
   zmax_eta_prime: number;
 }
 
-export function computeHeatmap(params: BeamParams, element: ElementSymbol, nPts = 201): HeatmapData {
-  const etaResult = computeEta(params, element);
+export function computeHeatmap(params: BeamParams, element: ElementSymbol, tau_override_s?: number, nPts = 201): HeatmapData {
+  const etaResult = computeEta(params, element, tau_override_s);
   const cs = getCrossSections(element, params.photonEnergy_eV / 1e3);
 
   const fwhm_x_nm = params.fwhm_x_m * 1e9;
