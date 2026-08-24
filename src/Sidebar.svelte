@@ -13,7 +13,7 @@
     { route: 'intensity',  number: '02', label: 'Intensity & fluence' },
     { route: 'eta',        number: '03', label: 'η / η′ per atom' },
     { route: 'omega',      number: '04', label: 'Solid angle' },
-    { route: 'about',      number: '05', label: 'Design notes', muted: true },
+    { route: 'about',      number: '05', label: 'Formulas' },
   ];
 </script>
 

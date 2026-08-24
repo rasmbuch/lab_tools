@@ -146,6 +146,7 @@
         mode: 'lines' as const,
         name: `σ_photo (${element})`,
         line: { color: '#16225C', width: 1.8 },
+        showlegend: false,
       },
       {
         type: 'scatter' as const,
@@ -156,22 +157,6 @@
         marker: { color: '#D4351F', size: 7, line: { color: '#FBF9F4', width: 1.5 } },
         showlegend: false,
       },
-      /* {
-        type: 'scatter' as const,
-        x: energyScan.map(p => p.energy_keV),
-        y: energyScan.map(p => p.eta),
-        mode: 'lines' as const,
-        name: `η (${element})`,
-        line: { color: '#1F5C43', width: 2 },
-      },
-      {
-        type: 'scatter' as const,
-        x: energyScan.map(p => p.energy_keV),
-        y: energyScan.map(p => p.eta_prime),
-        mode: 'lines' as const,
-        name: "η'",
-        line: { color: '#D4351F', width: 1.6, dash: 'dash' as const },
-      }, */
     ];
   });
 
@@ -194,7 +179,7 @@
         zeroline: false,
       },
       yaxis: {
-        title: { text: 'σ_photo  [barn]', font: { family: "'Archivo', sans-serif", size: 11, color: '#16225C' } },
+        title: { text: 'σ<sub>photo</sub>  [barn]', font: { family: "'Archivo', sans-serif", size: 11, color: '#16225C' } },
         type: 'log' as const,
         linecolor: '#333333',
         linewidth: 0.9,
@@ -207,14 +192,7 @@
         zeroline: false,
       },
       margin: { l: 50, r: 20, t: 8, b: 42 },
-      showlegend: true,
-      legend: {
-        x: 0.02, y: 0.98,
-        bgcolor: 'rgba(251,249,244,0.9)',
-        bordercolor: 'rgba(23,21,18,0.12)',
-        borderwidth: 1,
-        font: { size: 10 },
-      },
+      showlegend: false,
     };
   });
 
@@ -248,116 +226,6 @@
     <div class="col-left">
       <div class="section-label">Beam parameters</div>
       <BeamInputs />
-
-      <div class="element-section">
-        <div class="section-label">Element</div>
-        <div class="element-picker">
-          {#each ELEMENTS as el}
-            <button
-              class="element-chip"
-              class:active={element === el}
-              onclick={() => element = el}
-            >
-              <span class="element-sym">{el}</span>
-              <span class="element-z">{elementZ(el)}</span>
-              {#if element === el}
-                <span class="element-bar"></span>
-              {/if}
-            </button>
-          {/each}
-        </div>
-      </div>
-
-      <div class="lifetime-section">
-        <div class="section-label">Hole lifetime override</div>
-        <div class="lifetime-chips">
-          {#each etaResult.shells as s}
-            <button
-              class="lifetime-chip"
-              onclick={() => tauOverride_fs = sigfigs(s.tau_hole_s * 1e15, 3)}
-            >
-              <span class="lifetime-shell">{s.name}</span>
-              <span class="lifetime-tau">{tauDisplay(s.tau_hole_s)}</span>
-            </button>
-          {/each}
-        </div>
-        <div class="lifetime-input-row">
-          <input
-            type="number"
-            class="lifetime-input"
-            placeholder="auto"
-            bind:value={tauOverride_fs}
-            step="any"
-            min="0"
-          />
-          <span class="output-unit">fs</span>
-          {#if tauOverride_fs !== ''}
-            <button class="lifetime-clear" onclick={() => tauOverride_fs = ''}>clear</button>
-          {/if}
-        </div>
-      </div>
-
-      <div class="output-group">
-        <div class="section-label">Derived</div>
-        <div class="output-rows">
-          <div class="output-row">
-            <span class="output-label">σ (total)</span>
-            <span class="output-value">{sigmaDisplay()} <select class="unit-select" bind:value={sigmaUnit}><option value="barn">barn</option><option value="cm²">cm²</option><option value="m²">m²</option></select></span>
-          </div>
-          <div class="output-row">
-            <span class="output-label">η (photo)</span>
-            <span class="output-value">{fmt(etaResult.eta_photo)} <span class="output-unit">ph/atom</span></span>
-          </div>
-          <div class="output-row">
-            <span class="output-label">η (total)</span>
-            <span class="output-value">{fmt(etaResult.eta_total)} <span class="output-unit">ph/atom</span></span>
-          </div>
-          <div class="output-row">
-            <span class="output-label">η′</span>
-            <span class="output-value">{fmt(etaResult.eta_prime_val)} <span class="output-unit">ph/atom</span></span>
-          </div>
-          <!-- {#if etaResult.eta_prime_shell}
-            <div class="output-row">
-              <span class="output-label">Dominant shell</span>
-              <span class="output-value">{etaResult.eta_prime_shell} <span class="output-unit">τ = {tauDisplay(etaResult.eta_prime_tau_s)}</span></span>
-            </div>
-          {/if} -->
-        </div>
-      </div>
-
-      <details class="shell-details" bind:open={shellTableOpen}>
-        <summary class="section-label clickable">Shell-resolved breakdown</summary>
-        {#if etaResult.shells.length > 0}
-          <div class="shell-table-wrap">
-            <table class="shell-table">
-              <thead>
-                <tr>
-                  <th>Shell</th>
-                  <th>σ [barn]</th>
-                  <th>η</th>
-                  <th>Γ [eV]</th>
-                  <th>τ<sub>hole</sub></th>
-                  <th>η′</th>
-                </tr>
-              </thead>
-              <tbody>
-                {#each etaResult.shells as s}
-                  <tr>
-                    <td>{s.name}</td>
-                    <td>{sigfigs(s.sigma_cm2 * 1e24, 3)}</td>
-                    <td>{sigfigs(s.eta_shell, 3)}</td>
-                    <td>{sigfigs(s.width_eV, 3)}</td>
-                    <td>{tauDisplay(s.tau_hole_s)}</td>
-                    <td>{sigfigs(s.eta_prime, 3)}</td>
-                  </tr>
-                {/each}
-              </tbody>
-            </table>
-          </div>
-        {:else}
-          <p class="no-shells">No accessible shells at this photon energy.</p>
-        {/if}
-      </details>
     </div>
 
     <div class="col-right">
@@ -378,30 +246,142 @@
       </div>
 
       <div class="plots-row">
-        <div class="plot-cell">
-          <div class="plot-header">
-            <span class="section-label" style="margin-bottom:0">Focal plane</span>
-            <div class="heatmap-toggle">
-              <button
-                class="toggle-btn"
-                class:active={heatmapMode === 'eta'}
-                onclick={() => heatmapMode = 'eta'}
-              >η</button>
-              <button
-                class="toggle-btn"
-                class:active={heatmapMode === 'eta_prime'}
-                onclick={() => heatmapMode = 'eta_prime'}
-              >η′</button>
+        <div class="plot-column">
+          <div class="plot-cell">
+            <div class="plot-header">
+              <span class="section-label" style="margin-bottom:0">Focal plane</span>
+              <div class="heatmap-toggle">
+                <button
+                  class="toggle-btn"
+                  class:active={heatmapMode === 'eta'}
+                  onclick={() => heatmapMode = 'eta'}
+                >η</button>
+                <button
+                  class="toggle-btn"
+                  class:active={heatmapMode === 'eta_prime'}
+                  onclick={() => heatmapMode = 'eta_prime'}
+                >η′</button>
+              </div>
+            </div>
+            <PlotlyChart data={heatmapData()} layout={heatmapLayout()} />
+          </div>
+
+          <div class="below-plot">
+            <div class="element-section">
+              <div class="section-label">Element</div>
+              <div class="element-picker">
+                {#each ELEMENTS as el}
+                  <button
+                    class="element-chip"
+                    class:active={element === el}
+                    onclick={() => element = el}
+                  >
+                    <span class="element-sym">{el}</span>
+                    <span class="element-z">{elementZ(el)}</span>
+                    {#if element === el}
+                      <span class="element-bar"></span>
+                    {/if}
+                  </button>
+                {/each}
+              </div>
+            </div>
+
+            <div class="lifetime-section">
+              <div class="section-label">Hole lifetime override</div>
+              <div class="lifetime-chips">
+                {#each etaResult.shells as s}
+                  <button
+                    class="lifetime-chip"
+                    onclick={() => tauOverride_fs = sigfigs(s.tau_hole_s * 1e15, 3)}
+                  >
+                    <span class="lifetime-shell">{s.name}</span>
+                    <span class="lifetime-tau">{tauDisplay(s.tau_hole_s)}</span>
+                  </button>
+                {/each}
+              </div>
+              <div class="lifetime-input-row">
+                <input
+                  type="number"
+                  class="lifetime-input"
+                  placeholder="auto"
+                  bind:value={tauOverride_fs}
+                  step="any"
+                  min="0"
+                />
+                <span class="output-unit">fs</span>
+                {#if tauOverride_fs !== ''}
+                  <button class="lifetime-clear" onclick={() => tauOverride_fs = ''}>clear</button>
+                {/if}
+              </div>
             </div>
           </div>
-          <PlotlyChart data={heatmapData()} layout={heatmapLayout()} />
         </div>
 
-        <div class="plot-cell">
-          <div class="plot-header">
-            <span class="section-label" style="margin-bottom:0">σ vs photon energy</span>
+        <div class="plot-column">
+          <div class="plot-cell">
+            <div class="plot-header">
+              <span class="section-label" style="margin-bottom:0; text-transform:none">σ vs photon energy</span>
+            </div>
+            <PlotlyChart data={energyScanData()} layout={energyScanLayout()} />
           </div>
-          <PlotlyChart data={energyScanData()} layout={energyScanLayout()} />
+
+          <div class="below-plot">
+            <div class="output-group">
+              <div class="section-label">Derived</div>
+              <div class="output-rows">
+                <div class="output-row">
+                  <span class="output-label">σ (total)</span>
+                  <span class="output-value">{sigmaDisplay()} <select class="unit-select" bind:value={sigmaUnit}><option value="barn">barn</option><option value="cm²">cm²</option><option value="m²">m²</option></select></span>
+                </div>
+                <div class="output-row">
+                  <span class="output-label">η (photo)</span>
+                  <span class="output-value">{fmt(etaResult.eta_photo)} <span class="output-unit">ph/atom</span></span>
+                </div>
+                <div class="output-row">
+                  <span class="output-label">η (total)</span>
+                  <span class="output-value">{fmt(etaResult.eta_total)} <span class="output-unit">ph/atom</span></span>
+                </div>
+                <div class="output-row">
+                  <span class="output-label">η′</span>
+                  <span class="output-value">{fmt(etaResult.eta_prime_val)} <span class="output-unit">ph/atom</span></span>
+                </div>
+              </div>
+            </div>
+
+            <details class="shell-details" bind:open={shellTableOpen}>
+              <summary class="section-label clickable">Shell-resolved breakdown</summary>
+              {#if etaResult.shells.length > 0}
+                <div class="shell-table-wrap">
+                  <table class="shell-table">
+                    <thead>
+                      <tr>
+                        <th>Shell</th>
+                        <th>σ [barn]</th>
+                        <th>η</th>
+                        <th>Γ [eV]</th>
+                        <th>τ<sub>hole</sub></th>
+                        <th>η′</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {#each etaResult.shells as s}
+                        <tr>
+                          <td>{s.name}</td>
+                          <td>{sigfigs(s.sigma_cm2 * 1e24, 3)}</td>
+                          <td>{sigfigs(s.eta_shell, 3)}</td>
+                          <td>{sigfigs(s.width_eV, 3)}</td>
+                          <td>{tauDisplay(s.tau_hole_s)}</td>
+                          <td>{sigfigs(s.eta_prime, 3)}</td>
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+                </div>
+              {:else}
+                <p class="no-shells">No accessible shells at this photon energy.</p>
+              {/if}
+            </details>
+          </div>
         </div>
       </div>
     </div>
@@ -489,6 +469,7 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 1px;
     background: var(--color-rule);
+    align-content: start;
   }
 
   .section-label {
@@ -644,11 +625,11 @@
 
   .result-band {
     background: var(--color-surface-card);
-    padding: 18px 24px;
+    padding: 10px 24px;
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 18px 32px;
+    gap: 8px 32px;
     transition: background 0.2s;
   }
 
@@ -674,10 +655,10 @@
 
   .result-number {
     font-family: var(--font-mono);
-    font-size: 42px;
+    font-size: 28px;
     line-height: 1;
     letter-spacing: -0.02em;
-    margin-top: 6px;
+    margin-top: 4px;
     color: var(--color-text);
   }
 
@@ -693,10 +674,10 @@
   .regime-name {
     font-family: var(--font-ui);
     font-weight: 600;
-    font-size: 22px;
+    font-size: 16px;
     line-height: 1.1;
     letter-spacing: -0.025em;
-    margin-top: 6px;
+    margin-top: 4px;
     color: var(--color-text);
   }
 
@@ -715,7 +696,7 @@
     color: rgba(255, 255, 255, 0.6);
   }
 
-  /* ── Plots row — side by side ─────────────────────────────────── */
+  /* ── Plots row — two columns, each with plot + controls below ── */
 
   .plots-row {
     display: grid;
@@ -724,9 +705,24 @@
     background: var(--color-rule);
   }
 
+  .plot-column {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 1px;
+    background: var(--color-rule);
+  }
+
   .plot-cell {
     background: var(--color-surface-card);
     padding: 16px 22px 10px;
+  }
+
+  .below-plot {
+    background: var(--color-surface-card);
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
 
   .plot-header {
@@ -767,11 +763,6 @@
   }
 
   /* ── Outputs ──────────────────────────────────────────────────── */
-
-  .output-group {
-    border-top: 1px solid var(--color-rule);
-    padding-top: 12px;
-  }
 
   .output-rows {
     display: flex;
@@ -895,15 +886,15 @@
     }
 
     .result-band {
-      gap: 16px 24px;
+      gap: 8px 24px;
     }
 
     .result-number {
-      font-size: 32px;
+      font-size: 24px;
     }
 
     .regime-name {
-      font-size: 18px;
+      font-size: 14px;
     }
   }
 </style>

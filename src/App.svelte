@@ -6,7 +6,7 @@
   import IntensityCalculator from './IntensityCalculator.svelte';
   import SolidAngleCalculator from './SolidAngleCalculator.svelte';
   import EtaCalculator from './EtaCalculator.svelte';
-  import Placeholder from './Placeholder.svelte';
+  import MathsReference from './MathsReference.svelte';
 
   let currentRoute: Route = $state(parseHash());
 
@@ -32,7 +32,7 @@
     {:else if currentRoute === 'omega'}
       <SolidAngleCalculator />
     {:else if currentRoute === 'about'}
-      <Placeholder number="05" category="info" title="Design notes" />
+      <MathsReference />
     {/if}
   </main>
 </div>

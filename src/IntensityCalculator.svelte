@@ -2,6 +2,7 @@
   import { computeBeam } from './lib/beam';
   import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode, transmission } from './lib/stores.svelte';
   import { sigfigs } from './lib/format';
+  import { eV_J } from './lib/constants';
   import BeamInputs from './lib/BeamInputs.svelte';
 
   function fmt(v: number): string {
@@ -9,13 +10,12 @@
     return sigfigs(v, 4);
   }
 
-  type FluenceUnit = 'ph/cm²' | 'ph/µm²';
-  type EnergyFluenceUnit = 'mJ/µm²' | 'µJ/µm²' | 'J/cm²';
+  type FluenceUnit = 'ph/µm²' | 'mJ/µm²' | 'µJ/µm²';
   type FluxUnit = 'ph/cm²/s' | 'ph/µm²/s';
   type IrradianceUnit = 'W/cm²' | 'W/µm²';
 
-  let fluenceUnit: FluenceUnit = $state('ph/cm²');
-  let energyFluenceUnit: EnergyFluenceUnit = $state('mJ/µm²');
+  let avgFluenceUnit: FluenceUnit = $state('mJ/µm²');
+  let peakFluenceUnit: FluenceUnit = $state('mJ/µm²');
   let fluxUnit: FluxUnit = $state('ph/cm²/s');
   let irradianceUnit: IrradianceUnit = $state('W/cm²');
 
@@ -30,17 +30,21 @@
     mode: spatialMode.value,
   }));
 
-  let fluenceDisplay = $derived(() => {
-    if (fluenceUnit === 'ph/µm²') return sigfigs(result.fluence_phcm2 * 1e-8, 4);
-    return sigfigs(result.fluence_phcm2, 4);
-  });
+  const LN2 = Math.log(2);
 
-  let peakFluenceDisplay = $derived(() => {
-    const F_J_m2 = pulseEnergy_at_sample_J / result.effectiveArea_m2;
-    if (energyFluenceUnit === 'mJ/µm²') return fmt(F_J_m2 * 1e-9);
-    if (energyFluenceUnit === 'µJ/µm²') return fmt(F_J_m2 * 1e-6);
-    return fmt(F_J_m2 * 1e-4); // J/cm²
-  });
+  let avgFluence_phcm2 = $derived(
+    spatialMode.value === 'gaussian'
+      ? result.fluence_phcm2 * 0.5 / LN2
+      : result.fluence_phcm2
+  );
+
+  function fluenceInUnit(phcm2: number, unit: FluenceUnit): string {
+    switch (unit) {
+      case 'ph/µm²': return sigfigs(phcm2 * 1e-8, 4);
+      case 'mJ/µm²': return fmt(phcm2 * photonEnergy.eV * eV_J * 1e-5);
+      case 'µJ/µm²': return fmt(phcm2 * photonEnergy.eV * eV_J * 1e-2);
+    }
+  }
 
   let fluxDisplay = $derived(() => {
     if (fluxUnit === 'ph/µm²/s') return sigfigs(result.peakFlux_phcm2s * 1e-8, 4);
@@ -98,12 +102,12 @@
             <span class="output-value">{irradianceDisplay()} <select class="unit-select" bind:value={irradianceUnit}><option value="W/cm²">W/cm²</option><option value="W/µm²">W/µm²</option></select></span>
           </div>
           <div class="output-row">
-            <span class="output-label">Fluence</span>
-            <span class="output-value">{fluenceDisplay()} <select class="unit-select" bind:value={fluenceUnit}><option value="ph/cm²">ph/cm²</option><option value="ph/µm²">ph/µm²</option></select></span>
+            <span class="output-label">Fluence (avg)</span>
+            <span class="output-value">{fluenceInUnit(avgFluence_phcm2, avgFluenceUnit)} <select class="unit-select" bind:value={avgFluenceUnit}><option value="ph/µm²">ph/µm²</option><option value="mJ/µm²">mJ/µm²</option><option value="µJ/µm²">µJ/µm²</option></select></span>
           </div>
           <div class="output-row">
-            <span class="output-label">Peak fluence</span>
-            <span class="output-value">{peakFluenceDisplay()} <select class="unit-select" bind:value={energyFluenceUnit}><option value="mJ/µm²">mJ/µm²</option><option value="µJ/µm²">µJ/µm²</option><option value="J/cm²">J/cm²</option></select></span>
+            <span class="output-label">Fluence (peak)</span>
+            <span class="output-value">{fluenceInUnit(result.fluence_phcm2, peakFluenceUnit)} <select class="unit-select" bind:value={peakFluenceUnit}><option value="ph/µm²">ph/µm²</option><option value="mJ/µm²">mJ/µm²</option><option value="µJ/µm²">µJ/µm²</option></select></span>
           </div>
           <div class="output-row">
             <span class="output-label">Peak flux</span>
