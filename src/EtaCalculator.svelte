@@ -1,12 +1,11 @@
 <script lang="ts">
   import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode, transmission } from './lib/stores.svelte';
   import { ELEMENTS, getElementInfo, getCrossSections, type ElementSymbol } from './lib/xray';
-  import { computeEta, computeHeatmap, computeEnergyScan } from './lib/eta';
-  import { thresholdColorscale } from './lib/plotly-theme';
+  import { computeEta, computeEnergyScan } from './lib/eta';
   import { sigfigs } from './lib/format';
-  import type { Data, Layout } from 'plotly.js';
   import BeamInputs from './lib/BeamInputs.svelte';
-  import PlotlyChart from './lib/PlotlyChart.svelte';
+  import CrossSectionPlot from './lib/CrossSectionPlot.svelte';
+  import FocalPlanePlot from './lib/FocalPlanePlot.svelte';
 
   let element: ElementSymbol = $state('Au');
   let heatmapMode: 'eta' | 'eta_prime' = $state('eta');
@@ -39,8 +38,11 @@
 
   let etaResult = $derived(computeEta(beamParams, element, tauOverride_s));
   let crossSections = $derived(getCrossSections(element, photonEnergy.eV / 1e3));
-  let heatmap = $derived(computeHeatmap(beamParams, element, tauOverride_s));
   let energyScan = $derived(computeEnergyScan(beamParams, element));
+
+  let etaPrimeRatio = $derived(
+    etaResult.eta_photo > 0 ? etaResult.eta_prime_val / etaResult.eta_photo : 0
+  );
 
   let isNonlinear = $derived(etaResult.eta_photo >= 1);
 
@@ -51,150 +53,6 @@
     return sigfigs(sigma_cm2 * 1e-4, 4); // m²
   });
 
-  let heatmapData = $derived((): Data[] => {
-    const is_eta = heatmapMode === 'eta';
-    const z = is_eta ? heatmap.eta_2d : heatmap.eta_prime_2d;
-    const zmax = is_eta ? heatmap.zmax_eta : heatmap.zmax_eta_prime;
-    const colorscale = thresholdColorscale(0, zmax, 1.0);
-    const label = is_eta ? 'η' : "η'";
-
-    return [{
-      type: 'heatmap' as const,
-      x: heatmap.x_nm,
-      y: heatmap.y_nm,
-      z,
-      colorscale,
-      zmin: 0,
-      zmax,
-      zsmooth: 'best' as const,
-      colorbar: {
-        title: { text: `${label}`, side: 'right' as const },
-        tickvals: zmax >= 1 ? [0, 1, zmax] : [0, zmax],
-        ticktext: zmax >= 1
-          ? ['0', '1.0', sigfigs(zmax, 3)]
-          : ['0', sigfigs(zmax, 3)],
-        outlinecolor: '#333333',
-        outlinewidth: 0.9,
-        tickfont: { family: "'IBM Plex Mono', monospace", size: 10 },
-        len: 0.9,
-      },
-      hovertemplate:
-        'x: %{x:.1f} nm<br>' +
-        'y: %{y:.1f} nm<br>' +
-        'r: %{customdata:.1f} nm<br>' +
-        `${label}: %{z:.4f}` +
-        '<extra></extra>',
-      customdata: heatmap.y_nm.map((_y, j) =>
-        heatmap.x_nm.map((_x, i) =>
-          Math.sqrt(heatmap.x_nm[i] ** 2 + heatmap.y_nm[j] ** 2)
-        )
-      ),
-    }];
-  });
-
-  let heatmapLayout = $derived((): Partial<Layout> => {
-    const fwhm_x_nm = fwhm.x_m * 1e9;
-    const fwhm_y_nm = fwhm.y_m * 1e9;
-    const extent_x = 2 * fwhm_x_nm;
-    const extent_y = 2 * fwhm_y_nm;
-
-    return {
-      paper_bgcolor: 'transparent',
-      plot_bgcolor: '#F8F6F1',
-      font: { family: "'IBM Plex Mono', monospace", color: '#4A443B', size: 10 },
-      xaxis: {
-        title: { text: 'x  [nm]', font: { family: "'Archivo', sans-serif", size: 11, color: '#4A443B' } },
-        range: [-extent_x, extent_x],
-        scaleanchor: 'y',
-        linecolor: '#333333',
-        linewidth: 0.9,
-        mirror: true,
-        ticks: 'inside',
-        tickcolor: '#333333',
-        tickwidth: 0.8,
-        ticklen: 4,
-        showgrid: false,
-        zeroline: false,
-        constrain: 'domain',
-      },
-      yaxis: {
-        title: { text: 'y  [nm]', font: { family: "'Archivo', sans-serif", size: 11, color: '#4A443B' } },
-        range: [-extent_y, extent_y],
-        linecolor: '#333333',
-        linewidth: 0.9,
-        mirror: true,
-        ticks: 'inside',
-        tickcolor: '#333333',
-        tickwidth: 0.8,
-        ticklen: 4,
-        showgrid: false,
-        zeroline: false,
-        constrain: 'domain',
-      },
-      margin: { l: 50, r: 80, t: 8, b: 42 },
-    };
-  });
-
-  let energyScanData = $derived((): Data[] => {
-    const currentKeV = photonEnergy.eV / 1e3;
-    const currentSigma = energyScan.find(p => Math.abs(p.energy_keV - currentKeV) / currentKeV < 0.05)?.sigma_barn ?? 0;
-    return [
-      {
-        type: 'scatter' as const,
-        x: energyScan.map(p => p.energy_keV),
-        y: energyScan.map(p => p.sigma_barn),
-        mode: 'lines' as const,
-        name: `σ_photo (${element})`,
-        line: { color: '#16225C', width: 1.8 },
-        showlegend: false,
-      },
-      {
-        type: 'scatter' as const,
-        x: [currentKeV],
-        y: [currentSigma],
-        mode: 'markers' as const,
-        name: 'current',
-        marker: { color: '#D4351F', size: 7, line: { color: '#FBF9F4', width: 1.5 } },
-        showlegend: false,
-      },
-    ];
-  });
-
-  let energyScanLayout = $derived((): Partial<Layout> => {
-    return {
-      paper_bgcolor: 'transparent',
-      plot_bgcolor: '#F8F6F1',
-      font: { family: "'IBM Plex Mono', monospace", color: '#4A443B', size: 10 },
-      xaxis: {
-        title: { text: 'photon energy  [keV]', font: { family: "'Archivo', sans-serif", size: 11, color: '#4A443B' } },
-        type: 'log' as const,
-        linecolor: '#333333',
-        linewidth: 0.9,
-        mirror: true,
-        ticks: 'inside',
-        tickcolor: '#333333',
-        tickwidth: 0.8,
-        ticklen: 4,
-        showgrid: false,
-        zeroline: false,
-      },
-      yaxis: {
-        title: { text: 'σ<sub>photo</sub>  [barn]', font: { family: "'Archivo', sans-serif", size: 11, color: '#16225C' } },
-        type: 'log' as const,
-        linecolor: '#333333',
-        linewidth: 0.9,
-        mirror: true,
-        ticks: 'inside',
-        tickcolor: '#333333',
-        tickwidth: 0.8,
-        ticklen: 4,
-        showgrid: false,
-        zeroline: false,
-      },
-      margin: { l: 50, r: 20, t: 8, b: 42 },
-      showlegend: false,
-    };
-  });
 
   function tauDisplay(tau_s: number): string {
     if (!Number.isFinite(tau_s) || tau_s <= 0) return '—';
@@ -245,144 +103,148 @@
         </div>
       </div>
 
-      <div class="plots-row">
-        <div class="plot-column">
-          <div class="plot-cell">
-            <div class="plot-header">
-              <span class="section-label" style="margin-bottom:0">Focal plane</span>
-              <div class="heatmap-toggle">
-                <button
-                  class="toggle-btn"
-                  class:active={heatmapMode === 'eta'}
-                  onclick={() => heatmapMode = 'eta'}
-                >η</button>
-                <button
-                  class="toggle-btn"
-                  class:active={heatmapMode === 'eta_prime'}
-                  onclick={() => heatmapMode = 'eta_prime'}
-                >η′</button>
-              </div>
+      <div class="grid-2x2">
+        <div class="grid-cell">
+          <div class="plot-header">
+            <span class="section-label" style="margin-bottom:0">Focal plane</span>
+            <div class="heatmap-toggle">
+              <button
+                class="toggle-btn"
+                class:active={heatmapMode === 'eta'}
+                onclick={() => heatmapMode = 'eta'}
+              >η</button>
+              <button
+                class="toggle-btn"
+                class:active={heatmapMode === 'eta_prime'}
+                onclick={() => heatmapMode = 'eta_prime'}
+              >η′</button>
             </div>
-            <PlotlyChart data={heatmapData()} layout={heatmapLayout()} />
+          </div>
+          <FocalPlanePlot
+            fwhm_x_nm={fwhm.x_m * 1e9}
+            fwhm_y_nm={fwhm.y_m * 1e9}
+            fluence_phcm2={etaResult.fluence_phcm2}
+            sigma_photo={crossSections.sigma_photo}
+            {etaPrimeRatio}
+            mode={spatialMode.value}
+            {heatmapMode}
+          />
+        </div>
+
+        <div class="grid-cell">
+          <div class="plot-header">
+            <span class="section-label" style="margin-bottom:0; text-transform:none">σ vs photon energy</span>
+          </div>
+          <CrossSectionPlot data={energyScan} currentKeV={photonEnergy.eV / 1e3} />
+        </div>
+
+        <div class="grid-cell">
+          <div class="element-section">
+            <div class="section-label">Element</div>
+            <div class="element-picker">
+              {#each ELEMENTS as el}
+                <button
+                  class="element-chip"
+                  class:active={element === el}
+                  onclick={() => element = el}
+                >
+                  <span class="element-sym">{el}</span>
+                  <span class="element-z">{elementZ(el)}</span>
+                  {#if element === el}
+                    <span class="element-bar"></span>
+                  {/if}
+                </button>
+              {/each}
+            </div>
           </div>
 
-          <div class="below-plot">
-            <div class="element-section">
-              <div class="section-label">Element</div>
-              <div class="element-picker">
-                {#each ELEMENTS as el}
-                  <button
-                    class="element-chip"
-                    class:active={element === el}
-                    onclick={() => element = el}
-                  >
-                    <span class="element-sym">{el}</span>
-                    <span class="element-z">{elementZ(el)}</span>
-                    {#if element === el}
-                      <span class="element-bar"></span>
-                    {/if}
-                  </button>
-                {/each}
-              </div>
+          <div class="lifetime-section">
+            <div class="section-label">Hole lifetime override</div>
+            <div class="lifetime-chips">
+              {#each etaResult.shells as s}
+                <button
+                  class="lifetime-chip"
+                  class:active-lifetime={tauOverride_fs === '' ? s.name === etaResult.eta_prime_shell : sigfigs(s.tau_hole_s * 1e15, 3) === tauOverride_fs}
+                  onclick={() => tauOverride_fs = sigfigs(s.tau_hole_s * 1e15, 3)}
+                >
+                  <span class="lifetime-shell">{s.name}</span>
+                  <span class="lifetime-tau">{tauDisplay(s.tau_hole_s)}</span>
+                </button>
+              {/each}
             </div>
-
-            <div class="lifetime-section">
-              <div class="section-label">Hole lifetime override</div>
-              <div class="lifetime-chips">
-                {#each etaResult.shells as s}
-                  <button
-                    class="lifetime-chip"
-                    class:active-lifetime={tauOverride_fs === '' ? s.name === etaResult.eta_prime_shell : sigfigs(s.tau_hole_s * 1e15, 3) === tauOverride_fs}
-                    onclick={() => tauOverride_fs = sigfigs(s.tau_hole_s * 1e15, 3)}
-                  >
-                    <span class="lifetime-shell">{s.name}</span>
-                    <span class="lifetime-tau">{tauDisplay(s.tau_hole_s)}</span>
-                  </button>
-                {/each}
-              </div>
-              <div class="lifetime-input-row">
-                <input
-                  type="number"
-                  class="lifetime-input"
-                  placeholder="auto"
-                  bind:value={tauOverride_fs}
-                  step="any"
-                  min="0"
-                />
-                <span class="output-unit">fs</span>
-                {#if tauOverride_fs !== ''}
-                  <button class="lifetime-clear" onclick={() => tauOverride_fs = ''}>clear</button>
-                {/if}
-              </div>
+            <div class="lifetime-input-row">
+              <input
+                type="number"
+                class="lifetime-input"
+                placeholder="auto"
+                bind:value={tauOverride_fs}
+                step="any"
+                min="0"
+              />
+              <span class="output-unit">fs</span>
+              {#if tauOverride_fs !== ''}
+                <button class="lifetime-clear" onclick={() => tauOverride_fs = ''}>clear</button>
+              {/if}
             </div>
           </div>
         </div>
 
-        <div class="plot-column">
-          <div class="plot-cell">
-            <div class="plot-header">
-              <span class="section-label" style="margin-bottom:0; text-transform:none">σ vs photon energy</span>
-            </div>
-            <PlotlyChart data={energyScanData()} layout={energyScanLayout()} />
-          </div>
-
-          <div class="below-plot">
-            <div class="output-group">
-              <div class="section-label">Derived</div>
-              <div class="output-rows">
-                <div class="output-row">
-                  <span class="output-label">σ (total)</span>
-                  <span class="output-value">{sigmaDisplay()} <select class="unit-select" bind:value={sigmaUnit}><option value="barn">barn</option><option value="cm²">cm²</option><option value="m²">m²</option></select></span>
-                </div>
-                <div class="output-row">
-                  <span class="output-label">η (photo)</span>
-                  <span class="output-value">{fmt(etaResult.eta_photo)} <span class="output-unit">ph/atom</span></span>
-                </div>
-                <div class="output-row">
-                  <span class="output-label">η (total)</span>
-                  <span class="output-value">{fmt(etaResult.eta_total)} <span class="output-unit">ph/atom</span></span>
-                </div>
-                <div class="output-row">
-                  <span class="output-label">η′</span>
-                  <span class="output-value">{fmt(etaResult.eta_prime_val)} <span class="output-unit">ph/atom</span></span>
-                </div>
+        <div class="grid-cell">
+          <div class="output-group">
+            <div class="section-label">Derived</div>
+            <div class="output-rows">
+              <div class="output-row">
+                <span class="output-label">σ (total)</span>
+                <span class="output-value">{sigmaDisplay()} <select class="unit-select" bind:value={sigmaUnit}><option value="barn">barn</option><option value="cm²">cm²</option><option value="m²">m²</option></select></span>
+              </div>
+              <div class="output-row">
+                <span class="output-label">η (photo)</span>
+                <span class="output-value">{fmt(etaResult.eta_photo)} <span class="output-unit">ph/atom</span></span>
+              </div>
+              <div class="output-row">
+                <span class="output-label">η (total)</span>
+                <span class="output-value">{fmt(etaResult.eta_total)} <span class="output-unit">ph/atom</span></span>
+              </div>
+              <div class="output-row">
+                <span class="output-label">η′</span>
+                <span class="output-value">{fmt(etaResult.eta_prime_val)} <span class="output-unit">ph/atom</span></span>
               </div>
             </div>
-
-            <details class="shell-details" bind:open={shellTableOpen}>
-              <summary class="section-label clickable">Shell-resolved breakdown</summary>
-              {#if etaResult.shells.length > 0}
-                <div class="shell-table-wrap">
-                  <table class="shell-table">
-                    <thead>
-                      <tr>
-                        <th>Shell</th>
-                        <th>σ [barn]</th>
-                        <th>η</th>
-                        <th>Γ [eV]</th>
-                        <th>τ<sub>hole</sub></th>
-                        <th>η′</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {#each etaResult.shells as s}
-                        <tr>
-                          <td>{s.name}</td>
-                          <td>{sigfigs(s.sigma_cm2 * 1e24, 3)}</td>
-                          <td>{sigfigs(s.eta_shell, 3)}</td>
-                          <td>{sigfigs(s.width_eV, 3)}</td>
-                          <td>{tauDisplay(s.tau_hole_s)}</td>
-                          <td>{sigfigs(s.eta_prime, 3)}</td>
-                        </tr>
-                      {/each}
-                    </tbody>
-                  </table>
-                </div>
-              {:else}
-                <p class="no-shells">No accessible shells at this photon energy.</p>
-              {/if}
-            </details>
           </div>
+
+          <details class="shell-details" bind:open={shellTableOpen}>
+            <summary class="section-label clickable">Shell-resolved breakdown</summary>
+            {#if etaResult.shells.length > 0}
+              <div class="shell-table-wrap">
+                <table class="shell-table">
+                  <thead>
+                    <tr>
+                      <th>Shell</th>
+                      <th>σ [barn]</th>
+                      <th>η</th>
+                      <th>Γ [eV]</th>
+                      <th>τ<sub>hole</sub></th>
+                      <th>η′</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {#each etaResult.shells as s}
+                      <tr>
+                        <td>{s.name}</td>
+                        <td>{sigfigs(s.sigma_cm2 * 1e24, 3)}</td>
+                        <td>{sigfigs(s.eta_shell, 3)}</td>
+                        <td>{sigfigs(s.width_eV, 3)}</td>
+                        <td>{tauDisplay(s.tau_hole_s)}</td>
+                        <td>{sigfigs(s.eta_prime, 3)}</td>
+                      </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </div>
+            {:else}
+              <p class="no-shells">No accessible shells at this photon energy.</p>
+            {/if}
+          </details>
         </div>
       </div>
     </div>
@@ -392,7 +254,7 @@
 <style>
   .calculator {
     padding: 42px 50px 60px;
-    max-width: 1500px;
+    max-width: 1200px;
   }
 
   .tool-header {
@@ -710,28 +572,17 @@
     color: rgba(255, 255, 255, 0.6);
   }
 
-  /* ── Plots row — two columns, each with plot + controls below ── */
+  /* ── 2×2 grid: plots top, controls bottom ───────────────────── */
 
-  .plots-row {
+  .grid-2x2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: var(--color-rule);
-  }
-
-  .plot-column {
-    display: grid;
     grid-template-rows: auto auto;
     gap: 1px;
     background: var(--color-rule);
   }
 
-  .plot-cell {
-    background: var(--color-surface-card);
-    padding: 16px 22px 10px;
-  }
-
-  .below-plot {
+  .grid-cell {
     background: var(--color-surface-card);
     padding: 18px 22px;
     display: flex;
@@ -889,7 +740,7 @@
   }
 
   @media (max-width: 1000px) {
-    .plots-row {
+    .grid-2x2 {
       grid-template-columns: 1fr;
     }
   }
