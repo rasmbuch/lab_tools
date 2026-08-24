@@ -1,6 +1,6 @@
 <script lang="ts">
   import { photonEnergy, pulseEnergy, fwhm, pulseDuration, spatialMode } from './lib/stores.svelte';
-  import { ELEMENTS, getElementInfo, type ElementSymbol } from './lib/xray';
+  import { ELEMENTS, getElementInfo, getCrossSections, type ElementSymbol } from './lib/xray';
   import { computeEta, computeHeatmap, computeEnergyScan } from './lib/eta';
   import { thresholdColorscale } from './lib/plotly-theme';
   import { sigfigs } from './lib/format';
@@ -32,6 +32,7 @@
   });
 
   let etaResult = $derived(computeEta(beamParams, element));
+  let crossSections = $derived(getCrossSections(element, photonEnergy.eV / 1e3));
   let heatmap = $derived(computeHeatmap(beamParams, element));
   let energyScan = $derived(computeEnergyScan(beamParams, element));
 
@@ -282,6 +283,10 @@
         <div class="section-label">Derived</div>
         <div class="output-rows">
           <div class="output-row">
+            <span class="output-label">σ (total)</span>
+            <span class="output-value">{fmt(crossSections.sigma_total * 1e24)} <span class="output-unit">barn</span></span>
+          </div>
+          <div class="output-row">
             <span class="output-label">η (photo)</span>
             <span class="output-value">{fmt(etaResult.eta_photo)} <span class="output-unit">ph/atom</span></span>
           </div>
@@ -293,12 +298,12 @@
             <span class="output-label">η′</span>
             <span class="output-value">{fmt(etaResult.eta_prime_val)} <span class="output-unit">ph/atom</span></span>
           </div>
-          {#if etaResult.eta_prime_shell}
+          <!-- {#if etaResult.eta_prime_shell}
             <div class="output-row">
               <span class="output-label">Dominant shell</span>
               <span class="output-value">{etaResult.eta_prime_shell} <span class="output-unit">τ = {tauDisplay(etaResult.eta_prime_tau_s)}</span></span>
             </div>
-          {/if}
+          {/if} -->
         </div>
       </div>
 
@@ -374,12 +379,12 @@
           <PlotlyChart data={heatmapData()} layout={heatmapLayout()} />
         </div>
 
-        <div class="plot-cell">
+        <!-- <div class="plot-cell">
           <div class="plot-header">
             <span class="section-label" style="margin-bottom:0">η vs photon energy</span>
           </div>
           <PlotlyChart data={energyScanData()} layout={energyScanLayout()} />
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

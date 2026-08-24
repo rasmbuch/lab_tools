@@ -18,11 +18,16 @@
     mode: spatialMode.value,
   }));
 
+  let peakFluence_mJ_um2 = $derived(
+    (pulseEnergy.J / result.effectiveArea_m2) * 1e-9
+  );
+
   let outputs = $derived({
     nPhotons: fmt(result.nPhotons),
     peakPower_GW: fmt(result.peakPower_W / 1e9),
     peakIrradiance: sigfigs(result.peakIrradiance_Wcm2, 4),
     fluence: sigfigs(result.fluence_phcm2, 4),
+    peakFluence_mJ_um2: fmt(peakFluence_mJ_um2),
     peakFlux: sigfigs(result.peakFlux_phcm2s, 4),
     effectiveArea_um2: fmt(result.effectiveArea_m2 * 1e12),
     beamWaist_x_nm: result.beamWaist_x_m != null ? fmt(result.beamWaist_x_m * 1e9) : null,
@@ -69,6 +74,10 @@
           <div class="output-row">
             <span class="output-label">Fluence</span>
             <span class="output-value">{outputs.fluence} <span class="output-unit">ph/cm²</span></span>
+          </div>
+          <div class="output-row">
+            <span class="output-label">Peak fluence</span>
+            <span class="output-value">{outputs.peakFluence_mJ_um2} <span class="output-unit">mJ/µm²</span></span>
           </div>
           <div class="output-row">
             <span class="output-label">Peak flux</span>
