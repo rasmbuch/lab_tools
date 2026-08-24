@@ -292,7 +292,7 @@
                 {#each etaResult.shells as s}
                   <button
                     class="lifetime-chip"
-                    class:active-lifetime={s.name === etaResult.eta_prime_shell}
+                    class:active-lifetime={tauOverride_fs === '' ? s.name === etaResult.eta_prime_shell : sigfigs(s.tau_hole_s * 1e15, 3) === tauOverride_fs}
                     onclick={() => tauOverride_fs = sigfigs(s.tau_hole_s * 1e15, 3)}
                   >
                     <span class="lifetime-shell">{s.name}</span>
