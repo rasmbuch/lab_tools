@@ -5,6 +5,7 @@
   import EnergyConverter from './EnergyConverter.svelte';
   import IntensityCalculator from './IntensityCalculator.svelte';
   import SolidAngleCalculator from './SolidAngleCalculator.svelte';
+  import EtaCalculator from './EtaCalculator.svelte';
   import Placeholder from './Placeholder.svelte';
 
   let currentRoute: Route = $state(parseHash());
@@ -27,7 +28,7 @@
     {:else if currentRoute === 'intensity'}
       <IntensityCalculator />
     {:else if currentRoute === 'eta'}
-      <Placeholder number="03" category="focal map" title="η / η′ per atom" />
+      <EtaCalculator />
     {:else if currentRoute === 'omega'}
       <SolidAngleCalculator />
     {:else if currentRoute === 'about'}

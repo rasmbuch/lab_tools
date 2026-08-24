@@ -17,7 +17,7 @@ import sys
 import numpy as np
 import xraylib as xrl
 
-ELEMENTS = ["H", "O", "Fe", "Cu", "Se", "Au"]
+ELEMENTS = ["H", "C", "O", "Ne", "Xe", "Fe", "Cu", "Au", "Pt"]
 
 E_MIN_KEV = 0.1
 E_MAX_KEV = 100.0

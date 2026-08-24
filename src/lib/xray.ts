@@ -1,23 +1,29 @@
 import type { XrayElementData, XrayCrossSections } from './xray-types';
 
 import dataH from './data/xray-H.json';
+import dataC from './data/xray-C.json';
 import dataO from './data/xray-O.json';
+import dataNe from './data/xray-Ne.json';
+import dataXe from './data/xray-Xe.json';
 import dataFe from './data/xray-Fe.json';
 import dataCu from './data/xray-Cu.json';
-import dataSe from './data/xray-Se.json';
 import dataAu from './data/xray-Au.json';
+import dataPt from './data/xray-Pt.json';
 
-export type ElementSymbol = 'H' | 'O' | 'Fe' | 'Cu' | 'Se' | 'Au';
+export type ElementSymbol = 'H' | 'C' | 'O' | 'Ne' | 'Xe' | 'Fe' | 'Cu' | 'Au' | 'Pt';
 
-export const ELEMENTS: readonly ElementSymbol[] = ['Au', 'Fe', 'Cu', 'Se', 'H', 'O'];
+export const ELEMENTS: readonly ElementSymbol[] = ['H', 'C', 'O', 'Ne', 'Xe', 'Fe', 'Cu', 'Au', 'Pt'];
 
 const RAW: Record<ElementSymbol, XrayElementData> = {
   H: dataH as XrayElementData,
+  C: dataC as XrayElementData,
   O: dataO as XrayElementData,
+  Ne: dataNe as XrayElementData,
+  Xe: dataXe as XrayElementData,
   Fe: dataFe as XrayElementData,
   Cu: dataCu as XrayElementData,
-  Se: dataSe as XrayElementData,
   Au: dataAu as XrayElementData,
+  Pt: dataPt as XrayElementData,
 };
 
 interface PreparedGrid {
