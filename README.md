@@ -2,6 +2,8 @@
 
 Browser-based calculators for XFEL nanofocus experiments.
 
+**[Live site](https://rasmbuch.github.io/lab_tools/)**
+
 ## Quick start
 
 ```bash

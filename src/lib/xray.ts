@@ -4,21 +4,23 @@ import dataH from './data/xray-H.json';
 import dataC from './data/xray-C.json';
 import dataO from './data/xray-O.json';
 import dataNe from './data/xray-Ne.json';
+import dataAr from './data/xray-Ar.json';
 import dataXe from './data/xray-Xe.json';
 import dataFe from './data/xray-Fe.json';
 import dataCu from './data/xray-Cu.json';
 import dataAu from './data/xray-Au.json';
 import dataPt from './data/xray-Pt.json';
 
-export type ElementSymbol = 'H' | 'C' | 'O' | 'Ne' | 'Xe' | 'Fe' | 'Cu' | 'Au' | 'Pt';
+export type ElementSymbol = 'H' | 'C' | 'O' | 'Ne' | 'Ar' | 'Xe' | 'Fe' | 'Cu' | 'Au' | 'Pt';
 
-export const ELEMENTS: readonly ElementSymbol[] = ['H', 'C', 'O', 'Ne', 'Fe', 'Cu', 'Xe', 'Pt', 'Au'];
+export const ELEMENTS: readonly ElementSymbol[] = ['H', 'C', 'O', 'Ne', 'Ar', 'Fe', 'Cu', 'Xe', 'Pt', 'Au'];
 
 const RAW: Record<ElementSymbol, XrayElementData> = {
   H: dataH as XrayElementData,
   C: dataC as XrayElementData,
   O: dataO as XrayElementData,
   Ne: dataNe as XrayElementData,
+  Ar: dataAr as XrayElementData,
   Xe: dataXe as XrayElementData,
   Fe: dataFe as XrayElementData,
   Cu: dataCu as XrayElementData,
