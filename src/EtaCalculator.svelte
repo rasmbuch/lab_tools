@@ -254,7 +254,7 @@
 <style>
   .calculator {
     padding: 42px 50px 60px;
-    max-width: 1200px;
+    max-width: 1100px;
   }
 
   .tool-header {
@@ -588,6 +588,8 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
+    width: 100%;
+    min-width: 0;
   }
 
   .plot-header {

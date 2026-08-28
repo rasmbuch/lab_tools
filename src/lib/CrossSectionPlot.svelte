@@ -36,7 +36,7 @@
 
 <div class="cs-plot">
   <Plot
-    height={220}
+    height={200}
     x={{ type: 'log', label: 'photon energy [keV]', nice: false }}
     y={{ type: 'log', label: 'σ_photo [barn]', nice: false }}
     grid={false}
@@ -87,7 +87,7 @@
 <style>
   .cs-plot {
     width: 100%;
-    min-height: 220px;
+    min-height: 0;
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--color-text);

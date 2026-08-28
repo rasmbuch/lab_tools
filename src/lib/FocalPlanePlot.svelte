@@ -105,7 +105,7 @@
   <div class="plot-row">
     <div class="plot-area">
       <Plot
-        height={220}
+        height={250}
         x={{ label: 'x [nm]', domain: [-extent_x, extent_x], nice: false }}
         y={{ label: 'y [nm]', domain: [-extent_y, extent_y], nice: false }}
         color={{
@@ -201,6 +201,13 @@
   .plot-area {
     flex: 1;
     min-width: 0;
+    width: 100%;
+  }
+  .plot-area :global(figure),
+  .plot-area :global(svg),
+  .plot-area :global(canvas) {
+    width: 100%;
+    height: 100%;
   }
 
   .focal-plot :global(figure) {
@@ -234,7 +241,7 @@
     flex-direction: column;
     align-items: center;
     padding-top: 4px;
-    width: 42px;
+    width: 40px;
     flex-shrink: 0;
   }
 

@@ -22,3 +22,11 @@ docs/images/
 # Node / Vite
 node_modules/
 dist/
+
+# Agent / Claude config
+.claude/
+CLAUDE.md
+CONTEXT.md
+docs/.wayfinder/
+docs/agents/
+docs/adr/

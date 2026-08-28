@@ -1,4 +1,4 @@
-export type Route = 'dashboard' | 'energy' | 'intensity' | 'eta' | 'omega' | 'about';
+export type Route = 'dashboard' | 'energy' | 'intensity' | 'eta' | 'omega' | 'about' | 'impressum' | 'aboutme';
 
 const HASH_TO_ROUTE: Record<string, Route> = {
   '':          'dashboard',
@@ -7,6 +7,8 @@ const HASH_TO_ROUTE: Record<string, Route> = {
   'eta':       'eta',
   'omega':     'omega',
   'about':     'about',
+  'impressum': 'impressum',
+  'aboutme':   'aboutme',
 };
 
 export function parseHash(): Route {

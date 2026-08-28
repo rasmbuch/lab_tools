@@ -1,0 +1,1003 @@
+<!--
+  PROTOTYPE — Dashboard layout variants for TICKET-004
+  Three radically different layouts, switchable via ?variant= and arrow keys.
+  Throwaway — fold the winner into Svelte, then delete this file.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab Tools — Dashboard Prototype</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   TOKENS
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Variant A — Gallery Wall */
+  --a-bg: #F7F3EE;
+  --a-surface: #FFFFFF;
+  --a-text: #1C1917;
+  --a-text-muted: #78716C;
+  --a-primary: #2A5F5F;
+  --a-accent: #C8873E;
+  --a-border: #E7E0D8;
+  --a-heading-font: Georgia, "Times New Roman", serif;
+  --a-body-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Variant B — Workbench */
+  --b-bg: #FFFFFF;
+  --b-surface: #F8FAFB;
+  --b-text: #1E293B;
+  --b-text-muted: #64748B;
+  --b-primary: #0D7377;
+  --b-accent: #E87B35;
+  --b-border: #E2E8F0;
+  --b-body-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --b-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+
+  /* Variant C — Journal */
+  --c-bg: #F0EBE3;
+  --c-surface: #FAF7F2;
+  --c-text: #141414;
+  --c-text-muted: #6B6560;
+  --c-primary: #B85C38;
+  --c-accent: #2A5F5F;
+  --c-border: #D6CFBF;
+  --c-heading-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --c-body-font: Georgia, "Times New Roman", serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESET
+   ═══════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { -webkit-font-smoothing: antialiased; }
+img, svg { display: block; max-width: 100%; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   VARIANT A — GALLERY WALL
+   ═══════════════════════════════════════════════════════════════════ */
+
+.variant-a {
+  background: var(--a-bg);
+  color: var(--a-text);
+  font-family: var(--a-body-font);
+  min-height: 100vh;
+  padding: 3rem 2rem 6rem;
+}
+
+.variant-a .va-header {
+  max-width: 720px;
+  margin: 0 auto 3.5rem;
+}
+
+.variant-a .va-title {
+  font-family: var(--a-heading-font);
+  font-size: 2.8rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--a-text);
+}
+
+.variant-a .va-subtitle {
+  font-size: 1.05rem;
+  color: var(--a-text-muted);
+  margin-top: 0.6rem;
+  line-height: 1.5;
+}
+
+.variant-a .va-grid {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
+  gap: 1.5rem;
+}
+
+.variant-a .va-card {
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: 4px;
+  padding: 1.8rem;
+  transition: box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.variant-a .va-card:hover {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.variant-a .va-card.va-featured {
+  grid-column: 1 / -1;
+}
+
+.variant-a .va-card-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--a-primary);
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.variant-a .va-card-title {
+  font-family: var(--a-heading-font);
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+}
+
+.variant-a .va-featured .va-card-title {
+  font-size: 1.5rem;
+}
+
+.variant-a .va-card-desc {
+  font-size: 0.85rem;
+  color: var(--a-text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.2rem;
+}
+
+.variant-a .va-preview {
+  background: var(--a-bg);
+  border-radius: 3px;
+  padding: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-a .va-preview-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.variant-a .va-preview-row:last-child { margin-bottom: 0; }
+
+.variant-a .va-preview-value {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 1.4rem;
+  color: var(--a-primary);
+  font-weight: 500;
+}
+
+.variant-a .va-featured .va-preview-value {
+  font-size: 1.6rem;
+}
+
+.variant-a .va-preview-unit {
+  font-size: 0.8rem;
+  color: var(--a-text-muted);
+}
+
+.variant-a .va-preview-arrow {
+  color: var(--a-accent);
+  font-size: 1rem;
+}
+
+/* Mini chart for eta tool */
+.variant-a .va-mini-chart {
+  position: relative;
+  height: 80px;
+  background: var(--a-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.variant-a .va-featured .va-mini-chart {
+  height: 120px;
+}
+
+.variant-a .va-mini-chart canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Geometry preview for solid angle */
+.variant-a .va-geom-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  background: var(--a-bg);
+  border-radius: 3px;
+}
+
+.variant-a .va-geom-preview svg {
+  width: 120px;
+  height: 70px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VARIANT B — WORKBENCH
+   ═══════════════════════════════════════════════════════════════════ */
+
+.variant-b {
+  background: var(--b-bg);
+  color: var(--b-text);
+  font-family: var(--b-body-font);
+  min-height: 100vh;
+}
+
+.variant-b .vb-topbar {
+  border-bottom: 1px solid var(--b-border);
+  padding: 1.2rem 2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.variant-b .vb-logo {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--b-text);
+}
+
+.variant-b .vb-logo-dot {
+  color: var(--b-primary);
+}
+
+.variant-b .vb-tagline {
+  font-size: 0.78rem;
+  color: var(--b-text-muted);
+}
+
+.variant-b .vb-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 6rem;
+}
+
+.variant-b .vb-section-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--b-text-muted);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.variant-b .vb-tools {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--b-border);
+  border: 1px solid var(--b-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.variant-b .vb-tool {
+  background: var(--b-bg);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.variant-b .vb-tool:hover {
+  background: var(--b-surface);
+}
+
+.variant-b .vb-tool-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.variant-b .vb-tool-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.variant-b .vb-tool-tag {
+  font-family: var(--b-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--b-primary);
+  background: rgba(13,115,119,0.08);
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.variant-b .vb-tool-desc {
+  font-size: 0.8rem;
+  color: var(--b-text-muted);
+  line-height: 1.45;
+  margin-bottom: 1rem;
+}
+
+.variant-b .vb-tool-preview {
+  background: var(--b-surface);
+  border: 1px solid var(--b-border);
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
+  font-family: var(--b-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--b-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-b .vb-tool-preview .vb-dim {
+  color: var(--b-text-muted);
+}
+
+.variant-b .vb-tool-preview .vb-hl {
+  color: var(--b-primary);
+  font-weight: 600;
+}
+
+.variant-b .vb-tool-preview .vb-accent {
+  color: var(--b-accent);
+}
+
+.variant-b .vb-mini-chart {
+  background: var(--b-surface);
+  border: 1px solid var(--b-border);
+  border-radius: 4px;
+  overflow: hidden;
+  height: 80px;
+  position: relative;
+}
+
+.variant-b .vb-mini-chart canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VARIANT C — JOURNAL
+   ═══════════════════════════════════════════════════════════════════ */
+
+.variant-c {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--c-body-font);
+  min-height: 100vh;
+}
+
+.variant-c .vc-header {
+  padding: 4rem 2rem 3rem;
+  max-width: 800px;
+  margin: 0 auto;
+  border-bottom: 2px solid var(--c-text);
+}
+
+.variant-c .vc-eyebrow {
+  font-family: var(--c-heading-font);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--c-text-muted);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.variant-c .vc-title {
+  font-family: var(--c-heading-font);
+  font-size: 3.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.0;
+  text-wrap: balance;
+}
+
+.variant-c .vc-intro {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--c-text-muted);
+  margin-top: 1.2rem;
+  max-width: 36em;
+}
+
+.variant-c .vc-tools {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+}
+
+.variant-c .vc-tool {
+  padding: 3rem 0;
+  border-bottom: 1px solid var(--c-border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.variant-c .vc-tool:nth-child(even) {
+  direction: rtl;
+}
+
+.variant-c .vc-tool:nth-child(even) > * {
+  direction: ltr;
+}
+
+.variant-c .vc-tool-info { }
+
+.variant-c .vc-tool-number {
+  font-family: var(--c-heading-font);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--c-primary);
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.variant-c .vc-tool-name {
+  font-family: var(--c-heading-font);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+
+.variant-c .vc-tool-desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--c-text-muted);
+}
+
+.variant-c .vc-tool-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--c-heading-font);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--c-primary);
+  text-decoration: none;
+  border-bottom: 2px solid var(--c-primary);
+  padding-bottom: 0.15rem;
+  cursor: pointer;
+}
+
+.variant-c .vc-tool-preview {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 2px;
+  padding: 1.5rem;
+}
+
+.variant-c .vc-preview-label {
+  font-family: var(--c-heading-font);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-text-muted);
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.variant-c .vc-preview-formula {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--c-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-c .vc-preview-formula .vc-hl {
+  color: var(--c-primary);
+  font-weight: 600;
+}
+
+.variant-c .vc-preview-formula .vc-dim {
+  color: var(--c-text-muted);
+}
+
+.variant-c .vc-mini-chart {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 2px;
+  overflow: hidden;
+  height: 140px;
+  position: relative;
+}
+
+.variant-c .vc-mini-chart canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FLOATING SWITCHER
+   ═══════════════════════════════════════════════════════════════════ */
+
+.proto-switcher {
+  position: fixed;
+  bottom: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 100px;
+  padding: 0.35rem 0.5rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.78rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  z-index: 9999;
+  user-select: none;
+}
+
+.proto-switcher button {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  line-height: 1;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+}
+
+.proto-switcher button:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+
+.proto-switcher .proto-label {
+  padding: 0.25rem 0.8rem;
+  min-width: 180px;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.proto-switcher .proto-variant-key {
+  color: #888;
+  margin-right: 0.5rem;
+}
+
+/* Hide all variants by default */
+.variant-a, .variant-b, .variant-c { display: none; }
+.variant-a.active, .variant-b.active, .variant-c.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ═══ VARIANT A — GALLERY WALL ═══════════════════════════════════ -->
+<div class="variant-a active" id="variant-a">
+  <header class="va-header">
+    <h1 class="va-title">Lab Tools</h1>
+    <p class="va-subtitle">Crystallography and scattering calculators for the nanofocus beamline</p>
+  </header>
+
+  <div class="va-grid">
+    <!-- Featured: Eta calculator -->
+    <div class="va-card va-featured">
+      <div class="va-card-label">Nonlinear regime</div>
+      <h2 class="va-card-title">Photons per Atom</h2>
+      <p class="va-card-desc">Estimate whether your pulse parameters reach the nonlinear regime. Computes eta and eta-prime from pulse energy, photon energy, focal spot, and pulse duration.</p>
+      <div class="va-mini-chart">
+        <canvas id="chart-a-eta"></canvas>
+      </div>
+    </div>
+
+    <!-- Energy converter -->
+    <div class="va-card">
+      <div class="va-card-label">Converter</div>
+      <h2 class="va-card-title">Energy &amp; Wavelength</h2>
+      <p class="va-card-desc">Convert between eV, keV, Angstrom, and nm.</p>
+      <div class="va-preview">
+        <div class="va-preview-row">
+          <span class="va-preview-value">1.5406</span>
+          <span class="va-preview-unit">Å</span>
+          <span class="va-preview-arrow">&rarr;</span>
+          <span class="va-preview-value">8.048</span>
+          <span class="va-preview-unit">keV</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intensity converter -->
+    <div class="va-card">
+      <div class="va-card-label">Converter</div>
+      <h2 class="va-card-title">Intensity Units</h2>
+      <p class="va-card-desc">Bridge between power density and photon fluence at a given photon energy.</p>
+      <div class="va-preview">
+        <div class="va-preview-row">
+          <span class="va-preview-value">10<sup>19</sup></span>
+          <span class="va-preview-unit">W/cm²</span>
+        </div>
+        <div class="va-preview-row">
+          <span class="va-preview-arrow">&darr;</span>
+        </div>
+        <div class="va-preview-row">
+          <span class="va-preview-value">6.24 &times; 10<sup>4</sup></span>
+          <span class="va-preview-unit">ph/nm²</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Solid angle -->
+    <div class="va-card">
+      <div class="va-card-label">Geometry</div>
+      <h2 class="va-card-title">Solid Angle</h2>
+      <p class="va-card-desc">Detector area and distance to steradians.</p>
+      <div class="va-geom-preview">
+        <svg viewBox="0 0 120 70" fill="none">
+          <circle cx="15" cy="35" r="3" fill="var(--a-accent)" />
+          <line x1="15" y1="35" x2="105" y2="10" stroke="var(--a-primary)" stroke-width="1" opacity="0.5" />
+          <line x1="15" y1="35" x2="105" y2="60" stroke="var(--a-primary)" stroke-width="1" opacity="0.5" />
+          <rect x="100" y="10" width="8" height="50" rx="1" fill="var(--a-primary)" opacity="0.15" stroke="var(--a-primary)" stroke-width="1" />
+          <text x="60" y="42" font-size="8" fill="var(--a-text-muted)" font-family="system-ui" text-anchor="middle">d</text>
+          <path d="M 25 30 A 12 12 0 0 1 25 40" stroke="var(--a-accent)" stroke-width="1.2" fill="none" />
+          <text x="32" y="38" font-size="7" fill="var(--a-accent)" font-family="system-ui">Ω</text>
+        </svg>
+      </div>
+      <div class="va-preview" style="margin-top: 0.8rem;">
+        <div class="va-preview-row">
+          <span class="va-preview-value">0.0032</span>
+          <span class="va-preview-unit">sr</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VARIANT B — WORKBENCH ══════════════════════════════════════ -->
+<div class="variant-b" id="variant-b">
+  <div class="vb-topbar">
+    <span class="vb-logo">lab<span class="vb-logo-dot">.</span>tools</span>
+    <span class="vb-tagline">Nanofocus beamline calculators</span>
+  </div>
+
+  <div class="vb-content">
+    <div class="vb-section-label">Calculators</div>
+    <div class="vb-tools">
+      <!-- Energy converter -->
+      <div class="vb-tool">
+        <div class="vb-tool-header">
+          <span class="vb-tool-name">Energy / Wavelength</span>
+          <span class="vb-tool-tag">converter</span>
+        </div>
+        <p class="vb-tool-desc">Bidirectional conversion between photon energy and wavelength units.</p>
+        <div class="vb-tool-preview">
+          <span class="vb-dim">λ =</span> <span class="vb-hl">1.5406</span> <span class="vb-dim">Å</span><br>
+          <span class="vb-dim">E =</span> <span class="vb-hl">8.0478</span> <span class="vb-dim">keV</span> <span class="vb-dim">=</span> <span>8047.8</span> <span class="vb-dim">eV</span>
+        </div>
+      </div>
+
+      <!-- Intensity converter -->
+      <div class="vb-tool">
+        <div class="vb-tool-header">
+          <span class="vb-tool-name">Intensity Units</span>
+          <span class="vb-tool-tag">converter</span>
+        </div>
+        <p class="vb-tool-desc">W/cm² to photon fluence at a given photon energy.</p>
+        <div class="vb-tool-preview">
+          <span class="vb-dim">I =</span> <span class="vb-hl">1.0 × 10¹⁹</span> <span class="vb-dim">W/cm²</span><br>
+          <span class="vb-dim">Φ =</span> <span class="vb-hl">6.24 × 10⁴</span> <span class="vb-dim">ph/nm²</span> <span class="vb-accent">@ 9.7 keV</span>
+        </div>
+      </div>
+
+      <!-- Eta calculator -->
+      <div class="vb-tool">
+        <div class="vb-tool-header">
+          <span class="vb-tool-name">η / η′ Calculator</span>
+          <span class="vb-tool-tag">analysis</span>
+        </div>
+        <p class="vb-tool-desc">Photons per atom per pulse — linear vs nonlinear regime estimation.</p>
+        <div class="vb-mini-chart">
+          <canvas id="chart-b-eta"></canvas>
+        </div>
+      </div>
+
+      <!-- Solid angle -->
+      <div class="vb-tool">
+        <div class="vb-tool-header">
+          <span class="vb-tool-name">Solid Angle</span>
+          <span class="vb-tool-tag">geometry</span>
+        </div>
+        <p class="vb-tool-desc">Detector acceptance from active area and sample distance.</p>
+        <div class="vb-tool-preview">
+          <span class="vb-dim">A =</span> <span>200 × 200</span> <span class="vb-dim">mm²</span><br>
+          <span class="vb-dim">d =</span> <span>350</span> <span class="vb-dim">mm</span><br>
+          <span class="vb-dim">Ω =</span> <span class="vb-hl">0.3175</span> <span class="vb-dim">sr</span> <span class="vb-accent">(2.53% of 4π)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VARIANT C — JOURNAL ════════════════════════════════════════ -->
+<div class="variant-c" id="variant-c">
+  <header class="vc-header">
+    <div class="vc-eyebrow">Crystallography &amp; Scattering</div>
+    <h1 class="vc-title">Lab Tools</h1>
+    <p class="vc-intro">Four interactive calculators for the nanofocus beamline. Each takes measured inputs and returns the quantities you need — live, as you type.</p>
+  </header>
+
+  <div class="vc-tools">
+    <!-- Energy converter -->
+    <div class="vc-tool">
+      <div class="vc-tool-info">
+        <div class="vc-tool-number">Tool 01</div>
+        <h2 class="vc-tool-name">Energy &amp; Wavelength</h2>
+        <p class="vc-tool-desc">Convert freely between photon energy and wavelength. Supports eV, keV, Angstrom, nm, THz, and cm⁻¹ — all updating simultaneously as you type any one.</p>
+        <a class="vc-tool-cta">Open calculator</a>
+      </div>
+      <div class="vc-tool-preview">
+        <div class="vc-preview-label">Example</div>
+        <div class="vc-preview-formula">
+          <span class="vc-dim">E</span> = <span class="vc-hl">hc / λ</span><br>
+          <span class="vc-dim">λ =</span> 1.5406 Å<br>
+          <span class="vc-dim">E =</span> <span class="vc-hl">8.0478</span> keV
+        </div>
+      </div>
+    </div>
+
+    <!-- Intensity converter -->
+    <div class="vc-tool">
+      <div class="vc-tool-info">
+        <div class="vc-tool-number">Tool 02</div>
+        <h2 class="vc-tool-name">Intensity Units</h2>
+        <p class="vc-tool-desc">Bridge the gap between power density (W/cm²) and photon fluence (photons/nm²) at any photon energy. The conversion everyone does on the back of an envelope, done properly.</p>
+        <a class="vc-tool-cta">Open calculator</a>
+      </div>
+      <div class="vc-tool-preview">
+        <div class="vc-preview-label">At 9.7 keV</div>
+        <div class="vc-preview-formula">
+          <span class="vc-dim">I =</span> 10<sup>19</sup> W/cm²<br>
+          <span class="vc-dim">Φ =</span> <span class="vc-hl">6.24 × 10⁴</span> ph/nm²
+        </div>
+      </div>
+    </div>
+
+    <!-- Eta calculator -->
+    <div class="vc-tool">
+      <div class="vc-tool-info">
+        <div class="vc-tool-number">Tool 03</div>
+        <h2 class="vc-tool-name">Photons per Atom</h2>
+        <p class="vc-tool-desc">The key figure of merit for nonlinear X-ray science: how many photons interact with each atom during a single pulse? When η exceeds 1, sequential multi-photon processes become probable.</p>
+        <a class="vc-tool-cta">Open calculator</a>
+      </div>
+      <div class="vc-mini-chart">
+        <canvas id="chart-c-eta"></canvas>
+      </div>
+    </div>
+
+    <!-- Solid angle -->
+    <div class="vc-tool">
+      <div class="vc-tool-info">
+        <div class="vc-tool-number">Tool 04</div>
+        <h2 class="vc-tool-name">Solid Angle</h2>
+        <p class="vc-tool-desc">Enter your detector's active area and sample-to-detector distance. Returns the solid angle in steradians and the fraction of the full sphere your detector subtends.</p>
+        <a class="vc-tool-cta">Open calculator</a>
+      </div>
+      <div class="vc-tool-preview">
+        <div class="vc-preview-label">Pilatus 1M at 350 mm</div>
+        <div class="vc-preview-formula">
+          <span class="vc-dim">A =</span> 200 × 200 mm²<br>
+          <span class="vc-dim">d =</span> 350 mm<br>
+          <span class="vc-dim">Ω =</span> <span class="vc-hl">0.318</span> sr <span class="vc-dim">(2.53% of 4π)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SWITCHER BAR ═══════════════════════════════════════════════ -->
+<div class="proto-switcher" id="switcher">
+  <button id="prev-btn" aria-label="Previous variant">&#8592;</button>
+  <div class="proto-label">
+    <span class="proto-variant-key" id="variant-key">A</span>
+    <span id="variant-name">Gallery Wall</span>
+  </div>
+  <button id="next-btn" aria-label="Next variant">&#8594;</button>
+</div>
+
+<script>
+// ─── Variant Switcher ─────────────────────────────────────────────
+const variants = [
+  { key: 'A', name: 'Gallery Wall', id: 'variant-a' },
+  { key: 'B', name: 'Workbench', id: 'variant-b' },
+  { key: 'C', name: 'Journal', id: 'variant-c' },
+];
+
+let currentIndex = 0;
+
+function showVariant(index) {
+  currentIndex = ((index % variants.length) + variants.length) % variants.length;
+  const v = variants[currentIndex];
+
+  variants.forEach(({ id }) => document.getElementById(id).classList.remove('active'));
+  document.getElementById(v.id).classList.add('active');
+
+  document.getElementById('variant-key').textContent = v.key;
+  document.getElementById('variant-name').textContent = v.name;
+
+  const url = new URL(window.location);
+  url.searchParams.set('variant', v.key);
+  history.replaceState(null, '', url);
+
+  drawCharts();
+}
+
+// Read initial variant from URL
+const urlVariant = new URLSearchParams(window.location.search).get('variant');
+if (urlVariant) {
+  const idx = variants.findIndex(v => v.key === urlVariant.toUpperCase());
+  if (idx !== -1) currentIndex = idx;
+}
+
+document.getElementById('prev-btn').addEventListener('click', () => showVariant(currentIndex - 1));
+document.getElementById('next-btn').addEventListener('click', () => showVariant(currentIndex + 1));
+
+document.addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA'].includes(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.key === 'ArrowLeft') showVariant(currentIndex - 1);
+  if (e.key === 'ArrowRight') showVariant(currentIndex + 1);
+});
+
+// ─── Mini Chart Drawing (eta vs pulse energy) ─────────────────────
+function drawEtaChart(canvasId, style) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+
+  const pad = { top: 12, right: 12, bottom: 20, left: 36 };
+  const pw = W - pad.left - pad.right;
+  const ph = H - pad.top - pad.bottom;
+
+  // eta data: log scale 1-1000 µJ, eta ~ proportional to pulse energy
+  // eta = sigma * N_photons / A_eff, N_photons = E_pulse / E_photon
+  // At 100µJ, 100nm, 9.7keV: eta ~ 45.6
+  const baseEta = 45.56;
+  const baseE = 100;
+  const points = 50;
+  const eMin = 1, eMax = 1000;
+
+  function logScale(val, min, max) {
+    return (Math.log10(val) - Math.log10(min)) / (Math.log10(max) - Math.log10(min));
+  }
+
+  // Grid lines
+  ctx.strokeStyle = style.grid;
+  ctx.lineWidth = 0.5;
+  [1, 10, 100, 1000].forEach(e => {
+    const x = pad.left + logScale(e, eMin, eMax) * pw;
+    ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + ph); ctx.stroke();
+  });
+
+  const etaMin = 0.1, etaMax = 1000;
+  [0.1, 1, 10, 100].forEach(eta => {
+    const y = pad.top + ph - logScale(eta, etaMin, etaMax) * ph;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pw, y); ctx.stroke();
+  });
+
+  // η = 1 threshold
+  const threshY = pad.top + ph - logScale(1, etaMin, etaMax) * ph;
+  ctx.strokeStyle = style.threshold;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath(); ctx.moveTo(pad.left, threshY); ctx.lineTo(pad.left + pw, threshY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // η curve
+  ctx.strokeStyle = style.line;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i <= points; i++) {
+    const t = i / points;
+    const e = eMin * Math.pow(eMax / eMin, t);
+    const eta = baseEta * (e / baseE);
+    const x = pad.left + t * pw;
+    const y = pad.top + ph - logScale(Math.max(eta, etaMin), etaMin, etaMax) * ph;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // η' curve (roughly eta * 0.028 for 10fs pulse)
+  ctx.strokeStyle = style.line2;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  for (let i = 0; i <= points; i++) {
+    const t = i / points;
+    const e = eMin * Math.pow(eMax / eMin, t);
+    const etaPrime = baseEta * (e / baseE) * 0.028;
+    const x = pad.left + t * pw;
+    const y = pad.top + ph - logScale(Math.max(etaPrime, etaMin), etaMin, etaMax) * ph;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.fillStyle = style.label;
+  ctx.font = `9px system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('Pulse energy (µJ)', pad.left + pw / 2, H - 2);
+
+  ctx.save();
+  ctx.translate(8, pad.top + ph / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('η', 0, 0);
+  ctx.restore();
+
+  // Legend
+  ctx.font = `8px system-ui, sans-serif`;
+  ctx.textAlign = 'left';
+
+  ctx.strokeStyle = style.line;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(pad.left + 4, pad.top + 6); ctx.lineTo(pad.left + 18, pad.top + 6); ctx.stroke();
+  ctx.fillStyle = style.label;
+  ctx.fillText('η', pad.left + 22, pad.top + 9);
+
+  ctx.strokeStyle = style.line2;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 2]);
+  ctx.beginPath(); ctx.moveTo(pad.left + 4, pad.top + 18); ctx.lineTo(pad.left + 18, pad.top + 18); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillText("η′", pad.left + 22, pad.top + 21);
+
+  // Threshold label
+  ctx.fillStyle = style.threshold;
+  ctx.font = `8px system-ui, sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.fillText('η = 1', pad.left + pw - 2, threshY - 3);
+}
+
+const chartStyles = {
+  a: {
+    line: '#2A5F5F', line2: '#C8873E',
+    grid: '#E7E0D8', threshold: '#999',
+    label: '#78716C', bg: '#F7F3EE'
+  },
+  b: {
+    line: '#0D7377', line2: '#E87B35',
+    grid: '#E2E8F0', threshold: '#94A3B8',
+    label: '#64748B', bg: '#F8FAFB'
+  },
+  c: {
+    line: '#B85C38', line2: '#2A5F5F',
+    grid: '#D6CFBF', threshold: '#999',
+    label: '#6B6560', bg: '#FAF7F2'
+  }
+};
+
+function drawCharts() {
+  drawEtaChart('chart-a-eta', chartStyles.a);
+  drawEtaChart('chart-b-eta', chartStyles.b);
+  drawEtaChart('chart-c-eta', chartStyles.c);
+}
+
+// Init
+showVariant(currentIndex);
+window.addEventListener('resize', drawCharts);
+</script>
+
+</body>
+</html>

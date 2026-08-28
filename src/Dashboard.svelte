@@ -16,11 +16,10 @@
 <div class="dashboard">
   <div class="hero">
     <div>
-      <h1>Five instruments for<br>the beamline</h1>
+      <h1>Table of Contents</h1>
     </div>
     <p class="hero-description">
-      Everything updates as you type. Nothing is submitted, nothing is stored.
-      Open the URL on the beamline tablet and it works the same.
+      These tools were written in the context of my PhD research and therefore follow conventions and default parameters native to Synchrotron/XFEL research.
     </p>
   </div>
 

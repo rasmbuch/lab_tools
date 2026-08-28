@@ -8,19 +8,19 @@
   let { currentRoute }: Props = $props();
 
   const navItems: { route: Route; number: string; label: string; muted?: boolean }[] = [
-    { route: 'dashboard',  number: '00', label: 'All tools' },
+    { route: 'dashboard',  number: '00', label: 'Table of Contents' },
     { route: 'energy',     number: '01', label: 'Energy & wavelength' },
     { route: 'intensity',  number: '02', label: 'Intensity & fluence' },
     { route: 'eta',        number: '03', label: 'η / η′ per atom' },
     { route: 'omega',      number: '04', label: 'Solid angle' },
-    { route: 'about',      number: '05', label: 'Formulas' },
+    { route: 'about',      number: '05', label: 'Formulas and References' },
   ];
 </script>
 
 <aside class="sidebar">
   <div class="header">
-    <div class="logo">Lab<br>Tools</div>
-    <div class="tagline">Calculators for XFEL nanofocus experiments</div>
+    <div class="logo">My Tool Box</div>
+    <div class="tagline">Some niche XFEL calculators.</div>
   </div>
 
   <nav>
@@ -42,7 +42,20 @@
   </nav>
 
   <div class="footer">
-    <div class="footer-text">static · no backend</div>
+    <div class="footer-links">
+      <button
+        class="footer-link"
+        class:active={currentRoute === 'aboutme'}
+        onclick={() => navigate('aboutme')}
+      >About Me</button>
+      <span class="footer-sep">/</span>
+      <button
+        class="footer-link"
+        class:active={currentRoute === 'impressum'}
+        onclick={() => navigate('impressum')}
+      >Impressum</button>
+    </div>
+    <div class="footer-text">Any wishes for tools to implement? Feel free to open up an issue in the corresponding git repository.</div>
   </div>
 </aside>
 
@@ -144,6 +157,39 @@
     margin-top: auto;
     padding: 22px 26px 26px;
     border-top: 1px solid var(--color-sidebar-border);
+  }
+
+  .footer-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .footer-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--color-sidebar-muted);
+    transition: color 0.15s;
+  }
+
+  .footer-link:hover {
+    color: var(--color-sidebar-text);
+  }
+
+  .footer-link.active {
+    color: var(--color-sidebar-text);
+  }
+
+  .footer-sep {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--color-sidebar-nav-muted);
+    opacity: 0.5;
   }
 
   .footer-text {

@@ -7,6 +7,8 @@
   import SolidAngleCalculator from './SolidAngleCalculator.svelte';
   import EtaCalculator from './EtaCalculator.svelte';
   import MathsReference from './MathsReference.svelte';
+  import Impressum from './Impressum.svelte';
+  import AboutMe from './AboutMe.svelte';
 
   let currentRoute: Route = $state(parseHash());
 
@@ -33,6 +35,10 @@
       <SolidAngleCalculator />
     {:else if currentRoute === 'about'}
       <MathsReference />
+    {:else if currentRoute === 'impressum'}
+      <Impressum />
+    {:else if currentRoute === 'aboutme'}
+      <AboutMe />
     {/if}
   </main>
 </div>
